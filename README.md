@@ -17,9 +17,9 @@ Installation on your local machine.
     npm start
     nodemon server.js
 ```
-4. Ctrl^c to stop.
+4. ```Ctrl^c``` to stop.
 
-## How to use
+## How to use 
 1. Browse to the host website.
 2. Open the server page. This page shows all activity on the server.
 3. Open some clients in new windows. 
