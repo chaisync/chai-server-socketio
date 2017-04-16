@@ -8,7 +8,7 @@ var server = require('http').createServer(app)
 var io = require('socket.io').listen(server)
 
 // Set port and start listening
-app.set('port', process.env.PORT || 8000);
+app.set('port', process.env.PORT || 8080);
 server.listen(app.get('port'), function(){
     console.log('Server started on port ' + app.get('port'));
 });
