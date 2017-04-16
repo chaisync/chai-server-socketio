@@ -19,7 +19,7 @@ Installation on your local machine.
 ```
 4. Ctrl^c to stop.
 
-## Usage
+## How to use
 1. Browse to the host website.
 2. Open the server page. This page shows all activity on the server.
 3. Open some clients in new windows. 
