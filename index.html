@@ -1,0 +1,56 @@
+<html>
+<head>
+    <title>NodeJS Express Socket.io</title>
+    <style>
+        #msgdiv {
+            background-color: #ccc;
+            padding: 20px
+        }
+    </style>
+
+</head>
+
+<body ng-app="myApp" ng-controller="myController">
+    <div id="msgdiv">
+        <h2>Message: {{user.firstname}} {{user.lastname}}</h2>
+    </div>
+    <form id='send-message'>
+        First Name:<br><input size='35' id='firstname' ng-model="firstname"></input><br>
+        Last Name:<br><input size='35' id='lastname' ng-model="lastname"></input><br>
+        <code>JSON preview: { firstname: "{{firstname}}", lastname: "{{lastname}}" }</code><br><br>
+        <button ng-click="submit()">Submit</button>
+    </form>
+
+    <!-- Include socket.io for client -->
+    <script src="http://localhost:8000/socket.io/socket.io.js"></script>
+
+    <!-- Include AngularJS CDN -->
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.7/angular.min.js"></script>
+    <script>
+        var app = angular.module("myApp", []);
+        app.controller("myController", function($scope){
+            var socket = io.connect();
+            $scope.user = {firstname: "", lastname: ""};
+
+            $scope.submit = function(){
+                $scope.user.firstname = $scope.firstname;
+                $scope.user.lastname = $scope.lastname;
+                socket.emit('send message', $scope.user);
+                //socket.emit('send message', {firstname: $scope.firstname,lastname: $scope.lastname});
+                document.getElementById("msgdiv").style.backgroundColor = "lightblue";
+                document.getElementById("firstname").value = "";
+                document.getElementById("lastname").value = "";
+            };
+
+            socket.on('new message', function(data){
+                document.getElementById("msgdiv").style.backgroundColor = "pink";
+                console.log("Received data: " + JSON.stringify(data));
+                $scope.$apply(function(){
+                    $scope.user.firstname = data.firstname;
+                $scope.user.lastname = data.lastname;
+                })
+            })
+        })
+    </script>
+</body>
+</html>

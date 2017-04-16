@@ -1,0 +1,42 @@
+<html>
+<head>
+    <title>Chai Server Page</title>
+</head>
+<body ng-app = "myApp" ng-controller="hello">
+    <div>
+        <h2>Field entry</h2>
+        <form ng-submit="myFunc()">
+            First name:<br><input type="text" name="firstname" ng-model="firstname" value=""><br>
+            Last name:<br><input type="text" name="lastname" ng-model="lastname" value=""><br>
+            <code>JSON preview: { firstname: "{{firstname}}", lastname: "{{lastname}}" }</code><br>
+            <br><br>
+            <button ng-click="submit()">Submit</button>
+        </form>
+    </div>
+    <div >
+        <h2>List of events</h2>
+        <ul>
+            <li ng-repeat="user in users | orderBy:'+':true">{{user}}</li>
+        </ul>
+    </div>
+
+
+    <!-- Include AngularJS CDN -->
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.7/angular.min.js"></script>
+    <script>
+        var app = angular.module("myApp", []);
+        app.controller('hello', function($scope){
+            // Create array to hold local data
+            $scope.users = [];
+
+            // Add new form entries to JSON array
+            $scope.submit = function(){
+                $scope.users.push({
+                    firstname: $scope.firstname,
+                    lastname: $scope.lastname
+                }); 
+            };
+        });
+    </script>
+</body>
+</html>
