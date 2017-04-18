@@ -8,6 +8,7 @@ var server = require('http').createServer(app)
 var io = require('socket.io').listen(server)
 
 // Database location
+app.use(express.static('public'))
 var fs = require('fs');
 
 // Set port and start listening
@@ -33,7 +34,7 @@ io.sockets.on('connection', function(socket){
         
         // Save JSON to File 
         
-        fs.appendFile('db.json', msg, function(err) {
+        fs.appendFile('public/db.json', msg, function(err) {
             if(err) {
                 return console.log(err);
             }
