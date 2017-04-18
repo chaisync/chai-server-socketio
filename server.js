@@ -7,6 +7,9 @@ var app = express()
 var server = require('http').createServer(app)
 var io = require('socket.io').listen(server)
 
+// Database location
+var fs = require('fs');
+
 // Set port and start listening
 app.set('port', process.env.PORT || 8080);
 server.listen(app.get('port'), function(){
@@ -22,11 +25,24 @@ app.get('/', function(req, res){
 // Serve all client websocket messages 
 io.sockets.on('connection', function(socket){
     socket.on('send message', function(data){
-        console.log("New message received: " + JSON.stringify(data));
+        var msg = JSON.stringify(data);
+        console.log("New message received: " + msg);
         // Send out to every client
         //io.sockets.emit('new message', data);
         // Send out to every client except originator
-        socket.broadcast.emit('new message', data)
+        
+        // Save JSON to File 
+        
+        fs.appendFile('db.json', msg, function(err) {
+            if(err) {
+                return console.log(err);
+            }
+            console.log("New JSON data sent to file");
+        });
+
+
+
+        socket.broadcast.emit('new message', msg)
     })
 
     socket.on('disconnect', function(){
