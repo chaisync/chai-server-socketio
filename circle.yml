@@ -1,0 +1,37 @@
+## Customize the test machine
+machine:
+
+  timezone:
+    America/Los_Angeles # Set the timezone
+
+  # Later figure out how to pre-install cache version of Node 4.6.0 or 4.6.1
+  # pre:
+  
+  # Version of node to use
+  node:
+    version: 4.6.0
+
+
+## Customize database setup
+#database:
+#  pre:
+    # No database used
+
+## Customize dependencies
+dependencies:
+  override:
+    - npm install
+
+## Customize test commands
+test:
+  override:
+    - npm test
+
+## Customize deployment commands
+# We can deploy using SSH
+deployment:
+  production:
+    branch: master
+    commands:
+      - ssh ec2-user@ec2-52-25-16-68.us-west-2.compute.amazonaws.com "echo ${CIRCLE_BRANCH}"
+      - ssh ec2-user@ec2-52-25-16-68.us-west-2.compute.amazonaws.com "./scripts/deploy.sh ${CIRCLE_BRANCH}"
