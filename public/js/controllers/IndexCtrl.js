@@ -44,15 +44,18 @@ app.controller("indexController", function($scope){
         document.getElementById("msgdiv").style.backgroundColor = "pink";
         console.log("Received data: " + JSON.stringify(data));
 
+        var obj = JSON.parse(data);
+        console.log(obj.firstname);
+
         var node = document.getElementById('outputLog');
         var newNode = document.createElement('p');
-        newNode.appendChild(document.createTextNode("data1 is " + data.firstname + ", data2 is " + data.lastname));
+        newNode.appendChild(document.createTextNode("data1 is " + obj.firstname + ", data2 is " + obj.lastname));
         node.appendChild(newNode);
 
         $scope.$apply(function(){
-            $scope.user.firstname = data.firstname;
-            console.log(data.firstname);
-            $scope.user.lastname = data.lastname;
+            $scope.user.firstname = obj.firstname;
+            console.log("firstname is " + obj.firstname);
+            $scope.user.lastname = obj.lastname;
         })
     })
 });
