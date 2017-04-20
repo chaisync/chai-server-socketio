@@ -17,9 +17,12 @@ server.listen(app.get('port'), function(){
     console.log('Server started on port ' + app.get('port'));
 });
 
+// set the static files location
+app.use(express.static(__dirname + '/public'));
+
 // Route all incoming http 
 app.get('/', function(req, res){
-    var path = __dirname + '/index.html';
+    var path = __dirname + '/public/index.html';
     res.sendFile(path);
 })
 
