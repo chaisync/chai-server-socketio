@@ -43,8 +43,15 @@ app.controller("indexController", function($scope){
     socket.on('new message', function(data){
         document.getElementById("msgdiv").style.backgroundColor = "pink";
         console.log("Received data: " + JSON.stringify(data));
+
+        var node = document.getElementById('outputLog');
+        var newNode = document.createElement('p');
+        newNode.appendChild(document.createTextNode("data1 is " + data.firstname + ", data2 is " + data.lastname));
+        node.appendChild(newNode);
+
         $scope.$apply(function(){
             $scope.user.firstname = data.firstname;
+            console.log(data.firstname);
             $scope.user.lastname = data.lastname;
         })
     })

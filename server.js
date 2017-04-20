@@ -7,9 +7,6 @@ var app = express()
 var server = require('http').createServer(app)
 var io = require('socket.io').listen(server)
 
-// Database location
-app.use(express.static('public'))
-var fs = require('fs');
 
 // Set port and start listening
 app.set('port', process.env.PORT || 8080);
@@ -17,8 +14,11 @@ server.listen(app.get('port'), function(){
     console.log('Server started on port ' + app.get('port'));
 });
 
-// set the static files location
+// set the static file location
 app.use(express.static(__dirname + '/public'));
+
+// Database location
+var fs = require('fs');
 
 // Route all incoming http 
 app.get('/', function(req, res){
