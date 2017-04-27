@@ -20,6 +20,9 @@ app.use(express.static(__dirname + '/public'));
 // Database location
 var fs = require('fs');
 
+// Create a database/mapping structure 
+var chaidb = [];
+
 // Route all incoming http 
 app.get('/', function(req, res){
     var path = __dirname + '/public/index.html';
@@ -36,7 +39,9 @@ io.sockets.on('connection', function(socket){
         // Send out to every client except originator
         
         // Save JSON to File 
-        
+        chaidb.push(data);
+        console.log("Data added to DB: " + JSON.stringify(chaidb));
+
         fs.appendFile('public/db.json', msg, function(err) {
             if(err) {
                 return console.log(err);
@@ -44,6 +49,8 @@ io.sockets.on('connection', function(socket){
             console.log("New JSON data sent to file");
         });
 
+        //var obj = JSON.parse(data);
+        console.log(chaidb);
 
 
         socket.broadcast.emit('new message', msg)
