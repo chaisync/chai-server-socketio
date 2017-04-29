@@ -52,9 +52,8 @@
 
         <div class="row">
             <div class="col-lg-6" id="datalistdiv">
-                
-                <div class="dropdown">
-                    <h2>Data</h2>
+                <h2>Data</h2>
+                <!--<div class="dropdown">                   
                     <button class="btn btn-primary dropdown-toggle" type="button" data-toggle="dropdown">Filter by:
                     <span class="caret"></span></button>
                     <ul class="dropdown-menu">
@@ -63,12 +62,12 @@
                         <li><a href="#">Device</a></li>
                         <li><a href="#">Device</a></li>
                     </ul>
-                </div>
+                </div>-->
                 <ul class="list-group">
                     <li class="list-group-item" ng-repeat="chunk in chunks | orderBy:'+':true">
                         <code>{{chunk.timestamp}}<br>
                         &nbsp;User:&nbsp;{{chunk.user}}&nbsp;Device:&nbsp;{{chunk.deviceID}}&nbsp;<br>
-                        &nbsp;Data:&nbsp;{{chunk.reminderTime}}</code>
+                        &nbsp;Reminder:&nbsp;{{chunk.reminderTime}}</code>
                     </li>
                 </ul>
             </div>
@@ -77,7 +76,7 @@
                 <h2>Events</h2>
                 <ul class="list-group">
                     <li class="list-group-item" ng-repeat="log in logs | orderBy:'+':true">
-                        <code>{{log.timestamp}}&nbsp;>&nbsp;{{log.message}}</code>
+                        <code>{{log.message}}&nbsp;>&nbsp;{{log.timestamp}}</code>
                     </li>
                 </ul>
             </div>
@@ -88,31 +87,50 @@
     <!-- Include AngularJS CDN -->
     <script>
         var app = angular.module("myApp", []);
+        
         app.controller('hello', function($scope){
             var socket = io.connect();
 
             // Create array to hold local data
             $scope.chunks = [];
             $scope.logs = [];
-            var now = new Date().getTime();
 
             // Add new form entries to JSON array
-            $scope.submit = function(){ 
-                // user deviceID milliTime reminderTime-->
-                $scope.chunks.push({
+            $scope.submit = function(){
+                var chunk = {
                     deviceID: $scope.deviceID,
                     user: $scope.user,
                     reminderTime: $scope.reminderTime,
-                    timestamp: now
-                });
-                $scope.logs.push({
-                    message: "New data added",
-                    timestamp: now
-                });
+                    timestamp: new Date().getTime()
+                }
 
-                socket.emit('send message', $scope.chunks[$scope.chunks.length-1]);
+                // Emit form data json to server
+                socket.emit('send message', chunk);
             };
+
+            socket.on('send data to client', function(data){
+                console.log('Just got requested entry: ', JSON.parse(data));
+                // Make view update with received data
+                $scope.$apply(function(){
+                    $scope.chunks.push(JSON.parse(data)[0]);
+                    $scope.logs.push({
+                        message: "New data added",
+                        timestamp: JSON.parse(data)[0].timestamp
+                    });
+                });
+            })
+
+            socket.on('success', function(data){
+                console.log('success: ' + data[0] + ' ' + data[1]);
+                // Update local from db
+                socket.emit('get db entry from server', data[1]); 
+            })
+            
+            socket.on('error', function(data){
+                console.log('error: ' + data);
+            })
         });
+    
     </script>
 </body>
 </html>
