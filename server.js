@@ -22,8 +22,8 @@ var fs = require('fs'); //             <-- TODO: move to chaiDB.js module
 // Database
 var chaiDB = require('./chaiDB.js');
 var db = new chaiDB('./chaidb.json');
-db.setUsing('test');
-console.log('using '+db.getUsing());
+//db.setUsing('test');
+//console.log('using '+db.getUsing());
 
 // Route all incoming http 
 app.get('/', function(req, res){

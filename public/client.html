@@ -1,39 +1,238 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <title>Bootstrap Example</title>
+    <title>(Test) Chai Client</title>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- Include socket.io for client -->
+    <script src="/socket.io/socket.io.js"></script>
+
+    <!-- Include AngularJS CDN -->
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.7/angular.min.js"></script>
+    
+    <!-- Include Bootstrap -->
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    
+    <!-- Custom style -->
+    <style>
+        #apptabdiv {
+            padding: 20px;
+            background-color: #b3b3b3 ;
+            border: 1px solid black ;
+        }
+        #dataqueuediv {
+            padding: 20px;
+            background-color: lightsalmon ;
+        }
+        #noapp {
+            padding: 20px;
+            background-color: lightgray;
+        }
+        #app1 {
+            padding: 20px;
+            background-color: lightblue;
+        }
+        #app2 {
+            padding: 20px;
+            background-color: lightgreen ;
+        }
+        .glyphicon-wifi:before {
+            content: "\e074";
+        }
+        .glyphicon-wifi-alt:before {
+            content: "\e033";
+        }
+    </style>
 </head>
-<body>
+<body ng-app="myApp" ng-controller="clientCtrl">
 
 <div class="container">
-    <h2>Dynamic Pills</h2>
-    <p>To make the tabs toggleable, add the data-toggle="pill" attribute to each link. Then add a .tab-pane class with a unique ID for every tab and wrap them inside a div element with class .tab-content.</p>
+    <h2>Device Emulator</h2>
+    <!--<p>Instructions:</p>
+    <p>1. Select user name and device first. Once selected, don't change.</p>
+    <p>2. Toggle connection button to simulate device operation with and without connection.</p>
+    <p>3. Send to server to sync.</p>-->
+    <div class="row">
+        <div class="col-lg-2">
+            <button type="button" id="connectButton" class="btn btn-primary btn-block" ng-click="toggleConnection()">
+                Connected<span class="glyphicon glyphicon-signal" id="connectIcon"></span>
+            </button>
+        </div>
+        <div class="col-lg-2">
+            <form>
+                <div class="form-group">
+                    <label for="sel1">User:</label>
+                    <select class="form-control" id="sel1" ng-model="selectedUser" ng-options="item.user for item in users" ng-change="updateUser(selectedUser)">
+                    </select>
+                </div>
+            </form>              
+        </div>
+        <div class="col-lg-2">
+            <form>
+                <div class="form-group">
+                    <label for="sel1">Device:</label>
+                    <select class="form-control" id="sel2" ng-model="selectedDevice" ng-options="item for item in deviceList" ng-change="updateDevice(selectedDevice)">
+                    </select>
+                </div>
+            </form>
+        </div>
+        <div class="col-lg-6">
+
+        </div>
+        </div>
+    </div>
     
-    <ul class="nav nav-pills">
-        <li class="active"><a data-toggle="pill" href="#none">No App</a></li>
-        <li><a data-toggle="pill" href="#app1">App 1</a></li>
-        <li><a data-toggle="pill" href="#app2">App 2</a></li>
-    </ul>
-    <div class="tab-content">
-        <div id="none" class="tab-pane fade in active">
-            <h3>HOME</h3>
-            <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
+    <div class="col-lg-6" id="apptabdiv">
+        <ul class="nav nav-pills">
+            <li class="active"><a data-toggle="pill" href="#noapp">No App</a></li>
+            <li><a data-toggle="pill" href="#app1">App 1</a></li>
+            <li><a data-toggle="pill" href="#app2">App 2</a></li>
+        </ul>
+        <div class="tab-content">
+            <div id="noapp" class="tab-pane fade in active">
+                <h3>Inactive</h3>
+                <p>All apps currently off. Cannot send or listen to server for updates.</p>
+            </div>
+            <div id="app1" class="tab-pane fade">
+                <form id='send-message'>
+                    <div class="input-group">
+                        <input type="text" class="form-control" id='notification' ng-model="notification" placeholder="Enter notification"></input>                    
+                        <div class="input-group-btn">
+                            <button type="button" class="btn btn-default" ng-click="submitNote()" data-toggle="tooltip" title="Notification">
+                                <i class="glyphicon glyphicon-time"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="input-group">
+                        <input type="text" class="form-control" id='reminder' ng-model="reminder" placeholder="Enter reminder"></input>
+                        <div class="input-group-btn">
+                            <button type="button" class="btn btn-default" ng-click="submitRemind()" data-toggle="tooltip" title="Reminder">
+                                <i class="glyphicon glyphicon-bell"></i>
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div id="app2" class="tab-pane fade">
+                <form id='send-message'>
+                    <div class="input-group">
+                        <input type="text" class="form-control" id='notification' ng-model="notification" placeholder="Enter notification"></input>                    
+                        <div class="input-group-btn">
+                            <button type="button" class="btn btn-default" ng-click="submitNote()" data-toggle="tooltip" title="Notification">
+                                <i class="glyphicon glyphicon-time"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="input-group">
+                        <input type="text" class="form-control" id='reminder' ng-model="reminder" placeholder="Enter reminder"></input>
+                        <div class="input-group-btn">
+                            <button type="button" class="btn btn-default" ng-click="submitRemind()" data-toggle="tooltip" title="Reminder">
+                                <i class="glyphicon glyphicon-bell"></i>
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
         </div>
-        <div id="app1" class="tab-pane fade">
-            <h3>App 1</h3>
-            <p>Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</p>
-        </div>
-        <div id="app2" class="tab-pane fade">
-            <h3>App 2</h3>
-            <p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam.</p>
-        </div>
-  </div>
+    </div>
+
+    <div class="col-lg-6" id="dataqueuediv">
+
+    </div>
 </div>
 
+    <!-- Include AngularJS -->
+    <script>
+        var app = angular.module("myApp", []);
+        
+        app.controller('clientCtrl', function($scope){
+            var socket = io.connect();
+            
+            // local scope data
+            $scope.connected = true;
+
+            $scope.users = [
+                {user: 'angie@cpp.edu', device: ['iPad-4603488219','iPhone-443056133']},
+                {user: 'bryan@cpp.edu', device: ['GalaxyTab-99005','GalaxyPhone-7621']},
+                {user: 'caleb@cpp.edu', device: ['GalaxyTab-28177','GalaxyPhone-9981','iPad-3434599017','iPhone-324056836']},
+                {user: 'david@cpp.edu', device: ['iPad-0009555912','GalaxyPhone-3481']},
+                {user: 'erica@cpp.edu', device: ['GalaxyPhone-4482']},
+            ];
+            $scope.selectedUser = $scope.users[0];
+            $scope.deviceList = $scope.users[0].device;
+            $scope.selectedDevice = $scope.deviceList[0];
+            $scope.notification;
+            $scope.reminder;
+
+            // Control the behavior of the connection toggle button
+            $scope.toggleConnection = function(){
+                $scope.connected = !$scope.connected
+                if ($scope.connected == false){
+                    document.getElementById("connectIcon").className = "glyphicon glyphicon-ban-circle";
+                    document.getElementById("connectButton").className = "btn btn-danger btn-block";
+                    document.getElementById("connectButton").firstChild.data = "Off";                  
+                    return;
+                }
+                document.getElementById("connectIcon").className = "glyphicon glyphicon-signal";
+                document.getElementById("connectButton").className = "btn btn-primary btn-block";
+                document.getElementById("connectButton").firstChild.data = "Connected";    
+            }
+
+            // Select user dropdown tracks user selection and also updates the device list
+            $scope.updateUser = function(data){
+                $scope.selectedUser = data;
+                console.log('Selected user: ' + $scope.selectedUser.user);
+                index = $scope.users.indexOf(data);
+                console.log('index '+index);
+                $scope.deviceList = $scope.users[index].device;
+                $scope.selectedDevice = $scope.deviceList[0];
+                console.log('deviceList '+$scope.deviceList);
+            }
+
+            // Select device dropdown tracks user selection
+            $scope.updateDevice = function(data){
+                $scope.selectedDevice = data;
+                console.log('Selected device: ' + $scope.selectedDevice);
+            }
+
+            // Submit button grabs all data to emit
+            $scope.submitNote = function(){             
+                var result = {
+                    deviceID: $scope.selectedDevice,
+                    user: $scope.selectedUser.user,
+                    data: {notification: $scope.notification},
+                    timestamp: new Date().getTime()
+                }
+                console.log('New note ' + JSON.stringify(result));
+                socket.emit('send message', result);
+            }
+
+            // Submit button grabs all data to emit
+            $scope.submitRemind = function(){
+                var result = {
+                    deviceID: $scope.selectedDevice,
+                    user: $scope.selectedUser.user,
+                    data: {reminder: $scope.reminder},
+                    timestamp: new Date().getTime()
+                }
+                console.log('New reminder ' + JSON.stringify(result));
+                socket.emit('send message', result);
+            }
+
+            socket.on('success', function(data){
+                console.log('success: ' + data[0] + ' ' + data[1]);
+                // Update local from db
+                //socket.emit('get db entry from server', data[1]); 
+            })
+            
+            socket.on('error', function(data){
+                console.log('error: ' + data);
+            })
+        });
+    
+    </script>
 </body>
 </html>
