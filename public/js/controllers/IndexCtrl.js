@@ -55,9 +55,9 @@ app.controller("indexController", function($scope){
         node.appendChild(newNode);
 
         $scope.$apply(function(){
-            $scope.user.firstname = obj.firstname;
-            console.log("firstname is " + obj.firstname);
-            $scope.user.lastname = obj.lastname;
+            $scope.user.firstname = data.firstname;
+            console.log("firstname is " + data.firstname);
+            $scope.user.lastname = data.lastname;
         })
     })
 });
