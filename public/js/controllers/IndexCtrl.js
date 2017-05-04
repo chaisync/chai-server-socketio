@@ -12,6 +12,7 @@ app.controller("indexController", function($scope){
 
         data1 = $scope.firstname;
         data2 = $scope.lastname;
+
         var node = document.getElementById('outputLog');
         var newNode = document.createElement('p');
         newNode.appendChild(document.createTextNode("data1 is " + data1 + ", data2 is " + data2));
@@ -43,13 +44,14 @@ app.controller("indexController", function($scope){
     socket.on('new message', function(data){
         document.getElementById("msgdiv").style.backgroundColor = "pink";
         console.log("Received data: " + JSON.stringify(data));
+        console.log(data.firstname);
 
-        var obj = JSON.parse(data);
-        console.log(obj.firstname);
+        //var obj = JSON.parse(data);
+        console.log(data.firstname);
 
         var node = document.getElementById('outputLog');
         var newNode = document.createElement('p');
-        newNode.appendChild(document.createTextNode("data1 is " + obj.firstname + ", data2 is " + obj.lastname));
+        newNode.appendChild(document.createTextNode("data1 is " + data.firstname + ", data2 is " + data.lastname));
         node.appendChild(newNode);
 
         $scope.$apply(function(){
