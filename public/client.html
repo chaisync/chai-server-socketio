@@ -96,25 +96,31 @@
                 <h3>Inactive</h3>
                 <p>All apps currently off. Cannot send or listen to server for updates.</p>
             </div>
-            <div id="app1" class="tab-pane fade">
-                <form id='send-message'>
-                    <div class="input-group">
-                        <input type="text" class="form-control" id='notification' ng-model="notification" placeholder="Enter notification"></input>                    
-                        <div class="input-group-btn">
-                            <button type="button" class="btn btn-default" ng-click="submitNote()" data-toggle="tooltip" title="Notification">
-                                <i class="glyphicon glyphicon-time"></i>
-                            </button>
+            <div id="app1" class="row tab-pane fade">
+                <div class="col-lg-8"> 
+                    <form id='send-message'>
+                        <div class="input-group">
+                            <input type="text" class="form-control" id='notification' ng-model="notification" placeholder="Enter notification"></input>                    
+                            <div class="input-group-btn">
+                                <button type="button" class="btn btn-default" ng-click="submitNote()" data-toggle="tooltip" title="Notification">
+                                    <i class="glyphicon glyphicon-time"></i>
+                                </button>
+                            </div>
                         </div>
-                    </div>
-                    <div class="input-group">
-                        <input type="text" class="form-control" id='reminder' ng-model="reminder" placeholder="Enter reminder"></input>
-                        <div class="input-group-btn">
-                            <button type="button" class="btn btn-default" ng-click="submitRemind()" data-toggle="tooltip" title="Reminder">
-                                <i class="glyphicon glyphicon-bell"></i>
-                            </button>
+                        <div class="input-group">
+                            <input type="text" class="form-control" id='reminder' ng-model="reminder" placeholder="Enter reminder"></input>
+                            <div class="input-group-btn">
+                                <button type="button" class="btn btn-default" ng-click="submitRemind()" data-toggle="tooltip" title="Reminder">
+                                    <i class="glyphicon glyphicon-bell"></i>
+                                </button>
+                            </div>
                         </div>
-                    </div>
-                </form>
+                    </form>
+                </div>
+                <div class="col-lg-4">
+                    <h4 id="noteOut"><code>test 1</code></h4>
+                    <h4 id="remindOut"><code>test 2</code></h4>
+                </div>
             </div>
             <div id="app2" class="tab-pane fade">
                 <form id='send-message'>
@@ -208,6 +214,17 @@
                 }
                 console.log('New note ' + JSON.stringify(result));
                 socket.emit('send message', result);
+                
+                // Send data or save locally
+                if($scope.connected == true){
+                    socket.emit('send message', result);
+                    $scope.storedReminder = null;
+                    return;
+                }
+                $scope.storedNotification = result;
+                var node = document.getElementById('noteOut');
+                var newNode = document.createElement('code');
+                newNode.appendChild(document.createTextNode("data1 is " + data1 + ", data2 is " + data2));          
             }
 
             // Submit button grabs all data to emit
