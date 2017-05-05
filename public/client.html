@@ -98,89 +98,92 @@
         </div>
 
     </div>
-    
-    <div class="col-lg-6" id="apptabdiv">
 
-        <ul class="nav nav-tabs">
-            <li class="active"><a id="noAppTab" data-toggle="pill" href="#noapp">No App</a></li>
-            <li><a id="app1Tab" data-toggle="pill" href="#app1">App 1</a></li>
-            <li><a id="app2Tab" data-toggle="pill" href="#app2">App 2</a></li>
-        </ul>
+    <div id="mainContent" class="mt-5 container">
 
-        <div class="tab-content">
+        <div class="col-lg-6" id="apptabdiv">
 
-            <div id="noapp" class="tab-pane fade in active">
-                <h3>Inactive</h3>
-                <p>All apps currently off. Cannot send or listen to server for updates.</p>
-            </div>
+            <ul class="nav nav-tabs">
+                <li class="active"><a id="noAppTab" data-toggle="pill" href="#noapp">No App</a></li>
+                <li><a id="app1Tab" data-toggle="pill" href="#app1">App 1</a></li>
+                <li><a id="app2Tab" data-toggle="pill" href="#app2">App 2</a></li>
+            </ul>
 
-            <div id="app1" class="row tab-pane fade">
+            <div class="tab-content">
 
-                <div class="col-lg-8">
-                    <form id='send-message'>
-                        <div class="input-group">
-                            <input type="text" class="form-control" id='notification' ng-model="notification" placeholder="Enter notification"></input>                    
-                            <div class="input-group-btn">
-                                <button type="button" class="btn btn-default" ng-click="submitNote()" data-toggle="tooltip" title="Notification">
-                                    <i class="glyphicon glyphicon-time"></i>
-                                </button>
-                            </div>
-                        </div>
-                        <div class="input-group">
-                            <input type="text" class="form-control" id='reminder' ng-model="reminder" placeholder="Enter reminder"></input>
-                            <div class="input-group-btn">
-                                <button type="button" class="btn btn-default" ng-click="submitRemind()" data-toggle="tooltip" title="Reminder">
-                                    <i class="glyphicon glyphicon-bell"></i>
-                                </button>
-                            </div>
-                        </div>
-                    </form>
+                <div id="noapp" class="tab-pane fade in active">
+                    <h3>Inactive</h3>
+                    <p>All apps currently off. Cannot send or listen to server for updates.</p>
                 </div>
 
-                <div class="col-lg-4">
-                    <h4 id="noteOut" ><code>test 1</code></h4>
-                    <h4 id="remindOut" ><code>test 2</code></h4>
+                <div id="app1" class="row tab-pane fade">
+
+                    <div class="col-lg-8">
+                        <form id='send-message'>
+                            <div class="input-group">
+                                <input type="text" class="form-control" id='notification' ng-model="notification" placeholder="Enter notification"></input>
+                                <div class="input-group-btn">
+                                    <button type="button" class="btn btn-default" ng-click="submitNote()" data-toggle="tooltip" title="Notification">
+                                        <i class="glyphicon glyphicon-time"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="input-group">
+                                <input type="text" class="form-control" id='reminder' ng-model="reminder" placeholder="Enter reminder"></input>
+                                <div class="input-group-btn">
+                                    <button type="button" class="btn btn-default" ng-click="submitRemind()" data-toggle="tooltip" title="Reminder">
+                                        <i class="glyphicon glyphicon-bell"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+
+                    <div class="col-lg-4">
+                        <h4 id="noteOut" ><code>test 1</code></h4>
+                        <h4 id="remindOut" ><code>test 2</code></h4>
+                    </div>
+
                 </div>
 
-            </div>
+                <div id="app2" class="row tab-pane fade">
 
-            <div id="app2" class="row tab-pane fade">
-
-                <div class="col-lg-8">
-                    <form id='send-message'>
-                        <div class="input-group">
-                            <input type="text" class="form-control" id='notification' ng-model="notification" placeholder="Enter notification"></input>
-                            <div class="input-group-btn">
-                                <button type="button" class="btn btn-default" ng-click="submitNote()" data-toggle="tooltip" title="Notification">
-                                    <i class="glyphicon glyphicon-time"></i>
-                                </button>
+                    <div class="col-lg-8">
+                        <form id='send-message'>
+                            <div class="input-group">
+                                <input type="text" class="form-control" id='notification' ng-model="notification" placeholder="Enter notification"></input>
+                                <div class="input-group-btn">
+                                    <button type="button" class="btn btn-default" ng-click="submitNote()" data-toggle="tooltip" title="Notification">
+                                        <i class="glyphicon glyphicon-time"></i>
+                                    </button>
+                                </div>
                             </div>
-                        </div>
 
-                        <div class="input-group">
-                            <input type="text" class="form-control" id='reminder' ng-model="reminder" placeholder="Enter reminder"></input>
-                            <div class="input-group-btn">
-                                <button type="button" class="btn btn-default" ng-click="submitRemind()" data-toggle="tooltip" title="Reminder">
-                                    <i class="glyphicon glyphicon-bell"></i>
-                                </button>
+                            <div class="input-group">
+                                <input type="text" class="form-control" id='reminder' ng-model="reminder" placeholder="Enter reminder"></input>
+                                <div class="input-group-btn">
+                                    <button type="button" class="btn btn-default" ng-click="submitRemind()" data-toggle="tooltip" title="Reminder">
+                                        <i class="glyphicon glyphicon-bell"></i>
+                                    </button>
+                                </div>
                             </div>
-                        </div>
-                    </form>
-                </div>
+                        </form>
+                    </div>
 
-                <div class="col-lg-4">
-                    <h4 id="noteOut"><code>test 1</code></h4>
-                    <h4 id="remindOut"><code>test 2</code></h4>
+                    <div class="col-lg-4">
+                        <h4 id="noteOut"><code>test 1</code></h4>
+                        <h4 id="remindOut"><code>test 2</code></h4>
+                    </div>
+
                 </div>
 
             </div>
 
         </div>
 
-    </div>
-
-
-    <div class="col-lg-6" id="dataqueuediv">
+        <div class="col-lg-6" id="dataqueuediv">
+            <p>Output Log: </p>
+        </div>
 
     </div>
 
