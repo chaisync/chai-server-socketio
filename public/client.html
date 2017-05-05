@@ -121,17 +121,17 @@
                     <div class="col-lg-8">
                         <form id='send-message'>
                             <div class="input-group">
-                                <input type="text" class="form-control" id='notification' ng-model="notification" placeholder="Enter notification"></input>
+                                <input type="text" class="form-control" id='notificationApp1' ng-model="notificationApp1" placeholder="Enter notification"></input>
                                 <div class="input-group-btn">
-                                    <button type="button" class="btn btn-default" ng-click="submitNote()" data-toggle="tooltip" title="Notification">
+                                    <button type="button" class="btn btn-default" ng-click="submitNoteApp1()" data-toggle="tooltip" title="Notification">
                                         <i class="glyphicon glyphicon-time"></i>
                                     </button>
                                 </div>
                             </div>
                             <div class="input-group">
-                                <input type="text" class="form-control" id='reminder' ng-model="reminder" placeholder="Enter reminder"></input>
+                                <input type="text" class="form-control" id='reminderApp1' ng-model="reminderApp1" placeholder="Enter reminder for app1"></input>
                                 <div class="input-group-btn">
-                                    <button type="button" class="btn btn-default" ng-click="submitRemind()" data-toggle="tooltip" title="Reminder">
+                                    <button type="button" class="btn btn-default" ng-click="submitRemindApp1()" data-toggle="tooltip" title="Reminder">
                                         <i class="glyphicon glyphicon-bell"></i>
                                     </button>
                                 </div>
@@ -140,8 +140,8 @@
                     </div>
 
                     <div class="col-lg-4">
-                        <h4 id="noteOut" ><code>test 1</code></h4>
-                        <h4 id="remindOut" ><code>test 2</code></h4>
+                        <h4 id="note1Out"><code>{{notificationLocal}}</code></h4>
+                        <h4 id="remind1Out"><code>{{reminderLocal}}</code></h4>
                     </div>
 
                 </div>
@@ -151,18 +151,18 @@
                     <div class="col-lg-8">
                         <form id='send-message'>
                             <div class="input-group">
-                                <input type="text" class="form-control" id='notification' ng-model="notification" placeholder="Enter notification"></input>
+                                <input type="text" class="form-control" id='notificationApp2' ng-model="notificationApp2" placeholder="Enter notification">
                                 <div class="input-group-btn">
-                                    <button type="button" class="btn btn-default" ng-click="submitNote()" data-toggle="tooltip" title="Notification">
+                                    <button type="button" class="btn btn-default" ng-click="submitNoteApp2()" data-toggle="tooltip" title="Notification">
                                         <i class="glyphicon glyphicon-time"></i>
                                     </button>
                                 </div>
                             </div>
 
                             <div class="input-group">
-                                <input type="text" class="form-control" id='reminder' ng-model="reminder" placeholder="Enter reminder"></input>
+                                <input type="text" class="form-control" id='reminderApp2' ng-model="reminderApp2" placeholder="Enter reminder for app2">
                                 <div class="input-group-btn">
-                                    <button type="button" class="btn btn-default" ng-click="submitRemind()" data-toggle="tooltip" title="Reminder">
+                                    <button type="button" class="btn btn-default" ng-click="submitRemindApp2()" data-toggle="tooltip" title="Reminder">
                                         <i class="glyphicon glyphicon-bell"></i>
                                     </button>
                                 </div>
@@ -171,8 +171,8 @@
                     </div>
 
                     <div class="col-lg-4">
-                        <h4 id="noteOut"><code>test 1</code></h4>
-                        <h4 id="remindOut"><code>test 2</code></h4>
+                        <h4 id="note2Out" ><code>{{notificationLocal}}</code></h4>
+                        <h4 id="remind2Out" ><code>{{reminderLocal}}</code></h4>
                     </div>
 
                 </div>
@@ -206,13 +206,12 @@
                 {user: 'bryan@cpp.edu', device: ['GalaxyTab-99005','GalaxyPhone-7621']},
                 {user: 'caleb@cpp.edu', device: ['GalaxyTab-28177','GalaxyPhone-9981','iPad-3434599017','iPhone-324056836']},
                 {user: 'david@cpp.edu', device: ['iPad-0009555912','GalaxyPhone-3481']},
-                {user: 'erica@cpp.edu', device: ['GalaxyPhone-4482']},
+                {user: 'erica@cpp.edu', device: ['GalaxyPhone-4482']}
             ];
             $scope.selectedUser = $scope.users[0];
             $scope.deviceList = $scope.users[0].device;
             $scope.selectedDevice = $scope.deviceList[0];
-            $scope.notification;
-            $scope.reminder;
+
 
             // Control the behavior of the connection toggle button
             $scope.toggleConnection = function(){
@@ -264,46 +263,98 @@
             });
 
 
-            // Submit button grabs all data to emit
-            $scope.submitNote = function(){             
+            // Submit notification for app 1
+            $scope.submitNoteApp1 = function(){
                 var result = {
                     deviceID: $scope.selectedDevice,
                     user: $scope.selectedUser.user,
-                    data: {notification: $scope.notification},
+                    data: {notification: $scope.notificationApp1},
                     timestamp: new Date().getTime()
-                }
-                console.log('New note ' + JSON.stringify(result));
-                socket.emit('send message', result);
-                
-                // Send data or save locally
+                };
+
+                console.log('New notification for app 1 added to local variable, not on the server yet ' + JSON.stringify(result));
+
+                // Send data to server
                 if($scope.connected == true){
                     socket.emit('send message', result);
-                    $scope.storedReminder = null;
-                    return;
+                    console.log('New notification for app 1 added to the server ' + JSON.stringify(result));
+                    
                 }
-                $scope.storedNotification = result;
-                var node = document.getElementById('noteOut');
-                var newNode = document.createElement('code');
-                newNode.appendChild(document.createTextNode("data1 is " + data1 + ", data2 is " + data2));          
-            }
 
-            // Submit button grabs all data to emit
-            $scope.submitRemind = function(){
+                //display on client
+                $scope.notificationLocal = result.data.notification;
+
+            };
+
+            // Submit notification for app 1
+            $scope.submitNoteApp2 = function(){
                 var result = {
                     deviceID: $scope.selectedDevice,
                     user: $scope.selectedUser.user,
-                    data: {reminder: $scope.reminder},
+                    data: {notification: $scope.notificationApp2},
                     timestamp: new Date().getTime()
+                };
+
+                console.log('New notification for app 2 added to local variable, not on the server yet ' + JSON.stringify(result));
+
+                // Send data to server
+                if($scope.connected == true){
+                    socket.emit('send message', result);
+                    console.log('New notification for app 2 added to the server ' + JSON.stringify(result));
                 }
-                console.log('New reminder ' + JSON.stringify(result));
-                socket.emit('send message', result);
-            }
+
+                //display on client
+                $scope.notificationLocal = result.data.notification;
+
+            };
+
+
+            // Submit reminder for app1
+            $scope.submitRemindApp1 = function(){
+                var result = {
+                    deviceID: $scope.selectedDevice,
+                    user: $scope.selectedUser.user,
+                    data: {reminder: $scope.reminderApp1},
+                    timestamp: new Date().getTime()
+                };
+
+                console.log('New reminder for app 1 added to local variable, not on the server yet ' + JSON.stringify(result));
+
+                if($scope.connected == true) {
+                    socket.emit('send message', result);
+                    console.log('New reminder for app 1 added to the server' + JSON.stringify(result));
+                }
+
+                //display on client
+                $scope.reminderLocal = result.data.reminder;
+
+            };
+
+            // Submit Submit reminder for app2
+            $scope.submitRemindApp2 = function(){
+                var result = {
+                    deviceID: $scope.selectedDevice,
+                    user: $scope.selectedUser.user,
+                    data: {reminder: $scope.reminderApp2},
+                    timestamp: new Date().getTime()
+                };
+
+                console.log('New reminder for app 2 added to local variable, not on the server yet ' + JSON.stringify(result));
+
+                if($scope.connected == true) {
+                    socket.emit('send message', result);
+                    console.log('New reminder for app 2 added to the server' + JSON.stringify(result));
+                }
+
+                //display on client
+                $scope.reminderLocal = result.data.reminder;
+            };
 
             socket.on('success', function(data){
                 console.log('success: ' + data[0] + ' ' + data[1]);
                 // Update local from db
                 //socket.emit('get db entry from server', data[1]); 
-            })
+            });
             
             socket.on('error', function(data){
                 console.log('error: ' + data);
