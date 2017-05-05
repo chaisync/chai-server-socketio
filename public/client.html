@@ -182,7 +182,14 @@
         </div>
 
         <div class="col-lg-6" id="dataqueuediv">
-            <p>Output Log: </p>
+            <h4>Local Database Log: </h4>
+            <ul class="list-group">
+                <li class="list-group-item" ng-repeat="result in results | orderBy:'+':true">
+                    <code>Timestamp: {{result.timestamp}}
+                        <br>User:&nbsp;{{result.user}}&nbsp;Device:&nbsp;{{result.deviceID}}
+                        <br>Data:&nbsp;{{result.data}}</code>
+                </li>
+            </ul>
         </div>
 
     </div>
@@ -211,6 +218,7 @@
             $scope.selectedUser = $scope.users[0];
             $scope.deviceList = $scope.users[0].device;
             $scope.selectedDevice = $scope.deviceList[0];
+            $scope.results = [];
 
 
             // Control the behavior of the connection toggle button
@@ -272,6 +280,7 @@
                     timestamp: new Date().getTime()
                 };
 
+                $scope.results.push(result);
                 console.log('New notification for app 1 added to local variable, not on the server yet ' + JSON.stringify(result));
 
                 // Send data to server
@@ -295,6 +304,7 @@
                     timestamp: new Date().getTime()
                 };
 
+                $scope.results.push(result);
                 console.log('New notification for app 2 added to local variable, not on the server yet ' + JSON.stringify(result));
 
                 // Send data to server
@@ -318,6 +328,7 @@
                     timestamp: new Date().getTime()
                 };
 
+                $scope.results.push(result);
                 console.log('New reminder for app 1 added to local variable, not on the server yet ' + JSON.stringify(result));
 
                 if($scope.connected == true) {
@@ -339,6 +350,7 @@
                     timestamp: new Date().getTime()
                 };
 
+                $scope.results.push(result);
                 console.log('New reminder for app 2 added to local variable, not on the server yet ' + JSON.stringify(result));
 
                 if($scope.connected == true) {
