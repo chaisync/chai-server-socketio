@@ -26,7 +26,7 @@ var db = new chaiDB('./chaidb.json');
 //console.log('using '+db.getUsing());
 
 // Connection list
-var connList = require('./syncList.js');
+var connList = require('./connList.js');
 var conn = new connList();
 
 // Route all incoming http 
