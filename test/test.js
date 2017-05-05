@@ -73,3 +73,63 @@ describe('Socket.io specific tests', function(){
 
     });
 });
+
+describe('Connection list specific tests', function(){
+    var connList = require('../connList.js')
+    var conn = new connList()
+    var user
+    var device1, device2
+    var connection1, connection2
+    before(function(){
+        user = 'bob'
+        device1 = 'Galaxy'
+        connection1 = '1234abcd'
+        device2 = 'iPhone'
+        connection2 = '5678efgh'
+        connection2b = '9999zzzz'
+    })
+    describe('Get user from empty dict', function(){
+        it('should return empty string', function(){
+            var result = conn.get(user)
+            result.should.be.equal('')
+        });
+    });
+    describe('Set an initial connection', function(){
+        it('should add array of one connection', function(){
+            conn.set(user, device1, connection1)
+            var ary = []
+            ary.push({device:device1, connection:connection1})
+            var result = conn.get(user)
+            result.should.be.deep.equal(ary)
+        });
+    });
+    describe('Set a second connection', function(){
+        it('should add to array of connections', function(){
+            conn.set(user, device2, connection2)
+            var ary = []
+            ary.push({device:device1, connection:connection1})
+            ary.push({device:device2, connection:connection2})
+            var result = conn.get(user)
+            result.should.be.deep.equal(ary)
+        });
+    });
+    describe('Set an existing device with new connection', function(){
+        it('should change array of device connection', function(){
+            conn.set(user, device2, connection2b)
+            var ary = []
+            ary.push({device:device1, connection:connection1})
+            ary.push({device:device2, connection:connection2b})
+            var result = conn.get(user)
+            result.should.be.deep.equal(ary)
+        });
+    });
+    describe('Get user from populated dict', function(){
+        it('should return array of device-connection Objects', function(){
+            var result = conn.get(user)
+            var ary = []
+            ary.push({device:device1, connection:connection1})
+            ary.push({device:device2, connection:connection2b})
+            result.should.be.deep.equal(ary)
+        });
+    });
+});

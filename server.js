@@ -25,6 +25,10 @@ var db = new chaiDB('./chaidb.json');
 //db.setUsing('test');
 //console.log('using '+db.getUsing());
 
+// Connection list
+var connList = require('./syncList.js');
+var conn = new connList();
+
 // Route all incoming http 
 app.get('/', function(req, res){
     var path = __dirname + '/public/index.html';
@@ -33,6 +37,7 @@ app.get('/', function(req, res){
 
 // Serve all client websocket messages 
 io.sockets.on('connection', function(socket){
+    console.log('connection: ' + Object.keys(io.sockets.sockets));
     socket.on('send message', function(data){
         if(data == null){
             statusMsgToClient(1, 'No data received on server.');
@@ -71,10 +76,10 @@ io.sockets.on('connection', function(socket){
     socket.on('get db entry from server', function(timestamp){
         getDataByTimestamp(timestamp, sendDataToClient)
     })
-
+    
     socket.on('disconnect', function(){
-        console.log('Client disconnected')
-    })
+        console.log('disconnect: ' + Object.keys(io.sockets.sockets));
+    });
 
     // Search db by timestamp and return data element to client
     function getDataByTimestamp(timestamp, callback){
