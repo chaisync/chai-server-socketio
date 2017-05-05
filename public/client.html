@@ -8,6 +8,9 @@
     <!-- Include socket.io for client -->
     <script src="/socket.io/socket.io.js"></script>
 
+    <!-- Include jquery -->
+    <script src="https://code.jquery.com/jquery-3.1.1.slim.min.js" integrity="sha384-A7FZj7v+d/sdmMqp/nOQwliLvUsJfDHW+k9Omg/a/EheAdgtzNs3hpfag6Ed950n" crossorigin="anonymous"></script>
+
     <!-- Include AngularJS CDN -->
     <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.7/angular.min.js"></script>
     
@@ -18,26 +21,27 @@
     
     <!-- Custom style -->
     <style>
+        #myApp {
+            padding: 10px;
+        }
         #apptabdiv {
             padding: 20px;
-            background-color: #b3b3b3 ;
+            background-color: lightgray;
             border: 1px solid black ;
         }
         #dataqueuediv {
             padding: 20px;
             background-color: lightsalmon ;
+            border: 1px solid black;
         }
         #noapp {
-            padding: 20px;
-            background-color: lightgray;
+            padding: 10px;
         }
         #app1 {
-            padding: 20px;
-            background-color: lightblue;
+            padding: 10px;
         }
         #app2 {
-            padding: 20px;
-            background-color: lightgreen ;
+            padding: 10px;
         }
         .glyphicon-wifi:before {
             content: "\e074";
@@ -49,55 +53,70 @@
 </head>
 <body ng-app="myApp" ng-controller="clientCtrl">
 
-<div class="container">
-    <h2>Device Emulator</h2>
-    <!--<p>Instructions:</p>
-    <p>1. Select user name and device first. Once selected, don't change.</p>
-    <p>2. Toggle connection button to simulate device operation with and without connection.</p>
-    <p>3. Send to server to sync.</p>-->
-    <div class="row">
-        <div class="col-lg-2">
-            <button type="button" id="connectButton" class="btn btn-primary btn-block" ng-click="toggleConnection()">
-                Connected<span class="glyphicon glyphicon-signal" id="connectIcon"></span>
-            </button>
-        </div>
-        <div class="col-lg-2">
-            <form>
-                <div class="form-group">
-                    <label for="sel1">User:</label>
-                    <select class="form-control" id="sel1" ng-model="selectedUser" ng-options="item.user for item in users" ng-change="updateUser(selectedUser)">
-                    </select>
-                </div>
-            </form>              
-        </div>
-        <div class="col-lg-2">
-            <form>
-                <div class="form-group">
-                    <label for="sel1">Device:</label>
-                    <select class="form-control" id="sel2" ng-model="selectedDevice" ng-options="item for item in deviceList" ng-change="updateDevice(selectedDevice)">
-                    </select>
-                </div>
-            </form>
-        </div>
-        <div class="col-lg-6">
+<div class="mt-5 container" id="myApp">
+
+    <div class="container">
+
+        <h2>Device Emulator</h2>
+        <!--<p>Instructions:</p>
+        <p>1. Select user name and device first. Once selected, don't change.</p>
+        <p>2. Toggle connection button to simulate device operation with and without connection.</p>
+        <p>3. Send to server to sync.</p>-->
+        <div class="row">
+
+            <div id="connect" class="col-lg-2">
+                <br>
+                <button type="button" id="connectButton" class="btn btn-primary btn-block col-lg-6" ng-click="toggleConnection()">
+                    Connected<span class="glyphicon glyphicon-signal" id="connectIcon"></span>
+                </button>
+            </div>
+
+            <div class="col-lg-2">
+                <form>
+                    <div class="form-group">
+                        <label for="sel1">User:</label>
+                        <select class="form-control" id="sel1" ng-model="selectedUser" ng-options="item.user for item in users" ng-change="updateUser(selectedUser)">
+                        </select>
+                    </div>
+                </form>
+            </div>
+
+            <div class="col-lg-2">
+                <form>
+                    <div class="form-group">
+                        <label for="sel1">Device:</label>
+                        <select class="form-control" id="sel2" ng-model="selectedDevice" ng-options="item for item in deviceList" ng-change="updateDevice(selectedDevice)">
+                        </select>
+                    </div>
+                </form>
+            </div>
+
+            <div class="col-lg-6">
+
+            </div>
 
         </div>
-        </div>
+
     </div>
     
     <div class="col-lg-6" id="apptabdiv">
-        <ul class="nav nav-pills">
-            <li class="active"><a data-toggle="pill" href="#noapp">No App</a></li>
-            <li><a data-toggle="pill" href="#app1">App 1</a></li>
-            <li><a data-toggle="pill" href="#app2">App 2</a></li>
+
+        <ul class="nav nav-tabs">
+            <li class="active"><a id="noAppTab" data-toggle="pill" href="#noapp">No App</a></li>
+            <li><a id="app1Tab" data-toggle="pill" href="#app1">App 1</a></li>
+            <li><a id="app2Tab" data-toggle="pill" href="#app2">App 2</a></li>
         </ul>
+
         <div class="tab-content">
+
             <div id="noapp" class="tab-pane fade in active">
                 <h3>Inactive</h3>
                 <p>All apps currently off. Cannot send or listen to server for updates.</p>
             </div>
+
             <div id="app1" class="row tab-pane fade">
-                <div class="col-lg-8"> 
+
+                <div class="col-lg-8">
                     <form id='send-message'>
                         <div class="input-group">
                             <input type="text" class="form-control" id='notification' ng-model="notification" placeholder="Enter notification"></input>                    
@@ -117,41 +136,60 @@
                         </div>
                     </form>
                 </div>
+
+                <div class="col-lg-4">
+                    <h4 id="noteOut" ><code>test 1</code></h4>
+                    <h4 id="remindOut" ><code>test 2</code></h4>
+                </div>
+
+            </div>
+
+            <div id="app2" class="row tab-pane fade">
+
+                <div class="col-lg-8">
+                    <form id='send-message'>
+                        <div class="input-group">
+                            <input type="text" class="form-control" id='notification' ng-model="notification" placeholder="Enter notification"></input>
+                            <div class="input-group-btn">
+                                <button type="button" class="btn btn-default" ng-click="submitNote()" data-toggle="tooltip" title="Notification">
+                                    <i class="glyphicon glyphicon-time"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="input-group">
+                            <input type="text" class="form-control" id='reminder' ng-model="reminder" placeholder="Enter reminder"></input>
+                            <div class="input-group-btn">
+                                <button type="button" class="btn btn-default" ng-click="submitRemind()" data-toggle="tooltip" title="Reminder">
+                                    <i class="glyphicon glyphicon-bell"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+
                 <div class="col-lg-4">
                     <h4 id="noteOut"><code>test 1</code></h4>
                     <h4 id="remindOut"><code>test 2</code></h4>
                 </div>
+
             </div>
-            <div id="app2" class="tab-pane fade">
-                <form id='send-message'>
-                    <div class="input-group">
-                        <input type="text" class="form-control" id='notification' ng-model="notification" placeholder="Enter notification"></input>                    
-                        <div class="input-group-btn">
-                            <button type="button" class="btn btn-default" ng-click="submitNote()" data-toggle="tooltip" title="Notification">
-                                <i class="glyphicon glyphicon-time"></i>
-                            </button>
-                        </div>
-                    </div>
-                    <div class="input-group">
-                        <input type="text" class="form-control" id='reminder' ng-model="reminder" placeholder="Enter reminder"></input>
-                        <div class="input-group-btn">
-                            <button type="button" class="btn btn-default" ng-click="submitRemind()" data-toggle="tooltip" title="Reminder">
-                                <i class="glyphicon glyphicon-bell"></i>
-                            </button>
-                        </div>
-                    </div>
-                </form>
-            </div>
+
         </div>
+
     </div>
+
 
     <div class="col-lg-6" id="dataqueuediv">
 
     </div>
+
 </div>
 
     <!-- Include AngularJS -->
     <script>
+
+
         var app = angular.module("myApp", []);
         
         app.controller('clientCtrl', function($scope){
@@ -202,7 +240,26 @@
             $scope.updateDevice = function(data){
                 $scope.selectedDevice = data;
                 console.log('Selected device: ' + $scope.selectedDevice);
-            }
+            };
+
+            //click noApp to change background
+            $('#noAppTab').click(function() {
+                document.getElementById("apptabdiv").style.backgroundColor = "lightgray";
+
+            });
+
+            //click app1 to change background
+            $('#app1Tab').click(function() {
+                document.getElementById("apptabdiv").style.backgroundColor = "lightblue";
+
+            });
+
+            //click app2 to change background
+            $('#app2Tab').click(function() {
+                document.getElementById("apptabdiv").style.backgroundColor = "lightgreen";
+
+            });
+
 
             // Submit button grabs all data to emit
             $scope.submitNote = function(){             
