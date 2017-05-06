@@ -37,7 +37,6 @@ app.get('/', function(req, res){
 
 // Serve all client websocket messages 
 io.sockets.on('connection', function(socket){
-    console.log('connection: ' + Object.keys(io.sockets.sockets));
     socket.on('send message', function(data){
         if(data == null){
             statusMsgToClient(1, 'No data received on server.');
@@ -46,7 +45,15 @@ io.sockets.on('connection', function(socket){
         saveToDatabase(null, data, statusMsgToClient);
 
         // TO DO: change emit to send only to user's devices
-        socket.broadcast.emit('new message', data)
+        socket.emit('new message', data);
+        //socket.broadcast.emit('new message', data)
+
+        // Experiment to loop back to single client
+        // All connecitons: Object.keys(io.sockets.sockets)
+        // Single connection: 
+        console.log('Client: ' + socket.id);
+        //console.log('Client: ' + socketid + ' sent data' + JSON.stringify(data));
+        io.sockets.connected[socket.id].emit('new message', data)
     })
 
     // Save to database
