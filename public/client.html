@@ -306,7 +306,8 @@
 
                 // Attempt sending result to server
                 if($scope.connected == true) {
-                    socket.emit('send message', result);
+                    //socket.emit('send message', result);
+                    socket.emit('request update', result)
                 }
             };
 
@@ -327,6 +328,23 @@
                     document.getElementById("note2Out").style.color = ($scope.localdb.notification.synced) ? "black" : "red";
                 }         
             }
+
+            socket.on('send update', function(serverData){
+                console.log('Data from server: ', JSON.stringify(serverData))
+                var dataType = 'error'
+                if (serverData.data[0].hasOwnProperty('notification')){
+                    dataType = 'notification'
+                }
+                else if (serverData.data[0].hasOwnProperty('reminder')){
+                    dataType = 'reminder'
+                }
+                $scope.localdb[dataType] = serverData
+                setTimeout(function(){
+                    if (true){
+                        updateOutputSyncColors()
+                    }
+                }, 1000)
+            })
 
             socket.on('success', function(data){
                 console.log('success: ' + data[0] + ' ' + data[1]);

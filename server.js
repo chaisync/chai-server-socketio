@@ -22,8 +22,6 @@ var fs = require('fs'); //             <-- TODO: move to chaiDB.js module
 // Database
 var chaiDB = require('./chaiDB.js');
 var db = new chaiDB('./chaidb.json');
-//db.setUsing('test');
-//console.log('using '+db.getUsing());
 
 // Connection list
 var connList = require('./connList.js');
@@ -56,14 +54,56 @@ io.sockets.on('connection', function(socket){
         io.sockets.connected[socket.id].emit('new message', data)
     })
 
+    socket.on('request update', function(data){
+        if(data == null){
+            statusMsgToClient(1, 'No data received on server.');
+            return;
+        }
+
+        console.log('Client: ' + socket.id);
+        console.log('Data from client: ', JSON.stringify(data))
+        console.log('USer: ', data.user)
+        
+        var clientBehind = true
+        // TODO: read from serverdb
+        var serverData = db.findByUserAndDataType(data)
+        if (serverData.length == 0){
+            clientBehind = false 
+        }
+        console.log(JSON.stringify(serverData))
+        // TODO: compare client data to server db
+        
+        if (clientBehind){
+            // emit update(server db synced = true)
+            data.synced = true
+            io.sockets.connected[socket.id].emit('send update', data)
+            return    
+        }
+        // TODO: modify -> synced = true
+        data.synced = true
+        // TODO: create or update client data -> server db
+        if (db.findByUserAndDataType(data).length == 0){
+            db.create(data)
+        }
+        else{
+            db.update(data)
+        }
+        backupDatabase()
+        // TODO: read from serverdb
+
+        // TODO: emit update(server db synced=true)
+        io.sockets.connected[socket.id].emit('send update', data)
+        // TODO: broadcast to all user-devices
+
+    })
+
     // Save to database
     function saveToDatabase(err, data, callback){
         if(err){    
             return console.log(err);
         }
 
-        var msg = JSON.stringify(data);
-        console.log("New message received: " + msg);
+        console.log("New message received: " + JSON.stringify(data));
         
         // Push data to database
         db.create(data);
@@ -127,6 +167,15 @@ io.sockets.on('connection', function(socket){
         socket.emit('success', message);
     }
 
-    
+    // Backup database to file
+    function backupDatabase(){
+        // Backup database to file
+        fs.writeFile('public/db.json', db.toString(), function(err) {
+            if(err) {
+                return console.log(err);
+            }
+            console.log("Database file updated.");
+        });
+    }
 })
 

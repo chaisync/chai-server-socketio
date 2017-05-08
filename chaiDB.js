@@ -23,6 +23,7 @@ module.exports = function(mainFile){
 
     // Getters
     this.getMain = function(){
+        console.log('inside getMain' + this.main)
         return this.main;
     }
     this.getTest = function(){
@@ -51,21 +52,30 @@ module.exports = function(mainFile){
     
     // Find
     this.findByUser = function(value){
-        searchParam = value;
+        searchParam = value.user;
+        console.log('in findByUSer: ' + searchParam)
         return findByPredicate(null, 'filter', value, byUser, message)
     }
     this.findByTimestamp = function(value){
-        searchParam = value;
+        searchParam = value.timestammp;
         return findByPredicate(null, 'filter', value, byTimestamp, message)
+    }
+    this.findByUserAndDataType = function(value){
+        searchParam = value.user
+        searchParam2 = Object.keys(value.data[0])
+        console.log('in findByUserAndDataType ' +searchParam + ' '+searchParam2)
+        return findByPredicate(null, 'filter', value, byUserAndDataType, message)
     }
 
     // Find data elements according to filter predicate
     var searchParam = ''
-    function findByPredicate(err, type, value, predicate, callback){
+    var searchParam2 = ''
+    function findByPredicate(err, type, value, predicate, callback){    
         if(err){
             console.log('error: ' + err);
             return null;
         }
+
         var result = chaidb.filter(predicate)
         callback(null, type+' result: ', JSON.stringify(result))
         return result;     
@@ -73,6 +83,7 @@ module.exports = function(mainFile){
 
     // Predicates used by Find
     function byUser(x){
+        console.log('x.user = ' +  x.user + 'searchParam = ' + searchParam)
         return x.user === searchParam
     }
     function byDevice(x){
@@ -83,6 +94,11 @@ module.exports = function(mainFile){
     }
     function byTimestamp(x){
         return x.timestamp === searchParam
+    }
+    function byUserAndDataType(x){
+        var match = (x.user === searchParam) && (Object.keys(x.data[0])[0] == searchParam2)
+        console.log('match ?  ' + match)
+        return match
     }
 }
 
