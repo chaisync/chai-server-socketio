@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "start": "node server.js",
-    "test": "mocha test/test.js"
+    "test": "nyc --reporter=html mocha test/test.js"
   },
   "author": "",
   "license": "ISC",
@@ -16,7 +16,8 @@
   "devDependencies": {
     "chai": "^3.5.0",
     "mocha": "^3.2.0",
-    "nodemon": "^1.11.0"
+    "nodemon": "^1.11.0",
+    "nyc": "^10.3.2"
   },
   "repository": {
     "type": "git",

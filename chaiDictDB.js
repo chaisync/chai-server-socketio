@@ -69,11 +69,8 @@ function createData(err, type, value, callback){
         callback('error', type + ' cannot create, id already exists')
         return false;
     }
-    console.log('before' + JSON.stringify(chaidb))
     chaidb[id] = value
-    console.log('after' + JSON.stringify(chaidb))
     backup(null, saveFile)
-    //console.log(type + 'id[' + id + ']: ', value)
     callback(null, type + 'd id[' + id + ']: ', value)
     return true;
 }

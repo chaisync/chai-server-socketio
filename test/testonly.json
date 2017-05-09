@@ -1,12 +1,1 @@
-{
-"rick_notification":
-{
-"deviceID":"abcd",
-"user":"rick",
-"data":[{"notification":"something"}],
-"timestamp":5555
-}
-
-
-
-,"nina_notification":{"deviceID":"efgh","user":"nina","data":[{"notification":"something"}],"timestamp":5678}}
+{"rick_reminderTime":{"deviceID":"abcd","user":"rick","reminderTime":"something","timestamp":5555},"nina_reminderTime":{"deviceID":"efgh","user":"nina","reminderTime":"something","timestamp":5678}}

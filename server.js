@@ -17,7 +17,7 @@ server.listen(app.get('port'), function(){
 app.use(express.static(__dirname + '/public'));
 
 // Database location
-var fs = require('fs'); //             <-- TODO: move to chaiDB.js module
+//var fs = require('fs'); //             <-- TODO: move to chaiDB.js module
 
 // Database
 //var chaiDB = require('./chaiDB.js'); //<-- array style db
@@ -58,6 +58,7 @@ io.sockets.on('connection', function(socket){
     })
 
     socket.on('request update', function(clientData){
+        console.log('Client requests update: ' + clientData.user + ' on ' + socket.id);
         if(clientData == null){
             statusMsgToClient(1, 'No data received on server.');
             return;

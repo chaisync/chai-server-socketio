@@ -1,1 +1,1 @@
-{"bob_notification":{"deviceID":"abcd","user":"bob","data":[{"notification":"something"}],"timestamp":5555},"jan_notification":{"deviceID":"efgh","user":"jan","data":[{"notification":"something"}],"timestamp":5678}}
+{"bob_reminderTime":{"deviceID":"abcd","user":"bob","reminderTime":"something","timestamp":5555},"jan_reminderTime":{"deviceID":"efgh","user":"jan","reminderTime":"something","timestamp":5678}}

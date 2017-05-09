@@ -312,7 +312,6 @@
 
             // Check localdb sync status and update view
             function updateOutputSyncColors(){
-                console.log($scope.localdb)
                 if ($scope.localdb == null || $scope.localdb == {}){
                     return
                 }
@@ -329,6 +328,7 @@
             }
 
             socket.on('send update', function(serverData){
+                console.log('Update from server: ' + JSON.stringify(serverData))
                 var dataType = 'error'
                 if (serverData.hasOwnProperty('reminderTime')){
                     dataType = 'reminder'

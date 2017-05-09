@@ -14,7 +14,7 @@ var validateClientData = function(data){
         return false
     }
     
-    if(!data.hasOwnProperty('data')){
+    if(!data.hasOwnProperty('reminderTime')){
         return false
     }
 
@@ -27,7 +27,7 @@ var validateClientData = function(data){
 // Implement Id-creating function
 var getId = function(data){
     if(validateClientData(data) == true){
-        var id = [data.user, Object.keys(data.data[0])].join('_')
+        var id = [data.user, 'reminderTime'].join('_')
         return id
     }
     else{

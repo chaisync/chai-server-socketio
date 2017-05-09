@@ -2,44 +2,6 @@
 var chai = require('chai');
 var should = chai.should();
 
-// Describe structure of test suite
-describe('Database tests', function(){
-    var chaiDB = require('../chaiDB.js');
-    var db = new chaiDB('../public/testdb.json');
-    var foo;
-    var chunks;
-    var foo;
-    before(function(){
-        foo = 'peanut';
-    });
-    beforeEach(function(){   
-    });
-    describe('#test1', function(){
-        it('should be length 8', function(){
-            // Add test data to database
-            var chunk1 = {deviceID: "Android Tab", user: "angie@cpp.edu", reminderTime: "5:00pm",timestamp: 1};
-            var chunk2 = {deviceID: "Android Phone", user: "angie@cpp.edu", reminderTime: "2:00pm",timestamp: 1};
-            var chunk3 = {deviceID: "Apple iPhone", user: "angie@cpp.edu", reminderTime: "1:30pm",timestamp: 5};
-            var chunk4 = {deviceID: "Apple iPad", user: "angie@cpp.edu", reminderTime: "8:00pm",timestamp: 10};
-            var chunk5 = {deviceID: "Android Tab", user: "bryan@cpp.edu", reminderTime: "4:00pm",timestamp: 2};
-            var chunk6 = {deviceID: "Android Phone", user: "bryan@cpp.edu", reminderTime: "12:01pm",timestamp: 2};
-            var chunk7 = {deviceID: "Apple iPhone", user: "bryan@cpp.edu", reminderTime: "6:01pm",timestamp: 2};
-            var chunk8 = {deviceID: "Apple iPad", user: "bryan@cpp.edu", reminderTime: "6:01pm",timestamp: 2};
-            var chunks = [chunk1,chunk2,chunk3,chunk4,chunk5,chunk6,chunk7,chunk8];
-            chunks.forEach(function(entry){
-                db.create(entry);
-            })
-
-            chunks.length.should.be.equal(8);
-        })
-    });
-    describe('#test2', function(){
-        it('should be a string', function(){
-            foo.should.be.a.string;
-        });
-    });
-});
-
 describe('Http specific tests', function(){
     describe('#test1', function(){
         it('should test something http');
@@ -130,17 +92,17 @@ describe('ChaiDictDB specific tests', function(){
         validdata1 = {
             "deviceID":"abcd",
             "user":"bob",
-            "data":[{"notification":"something"}],
+            "reminderTime":"something",
             "timestamp":1234}
         validdata2 = {
             "deviceID":"efgh",
             "user":"jan",
-            "data":[{"notification":"something"}],
+            "reminderTime":"something",
             "timestamp":5678}
         baddata1 = {
             "deviceID":"abcd",
             //"user":"bob",
-            "data":[{"notification":"something"}],
+            "reminderTime":"something",
             "timestamp":1234}
     });
     describe('1 Get main file and get using file', function(){    
@@ -155,7 +117,6 @@ describe('ChaiDictDB specific tests', function(){
     describe('2 Create a valid data db entry', function(){    
         it('should create a new property and return true', function(){         
             db.create(validdata1).should.be.equal(true)
-            //console.log('db contents: ' + db.toString())
             db.contains(validdata1).should.be.equal(true)
             db.contains(validdata2).should.be.equal(false)
         });
@@ -222,7 +183,7 @@ describe('ChaiDictDB specific tests', function(){
             var fileName = 'test/testonly.json'
             db.setMain(fileName)
             db.loadFromFile()
-            var element1 = {"deviceID":"abcd","user":"rick","data":[{"notification":"something"}],"timestamp":5555}
+            var element1 = {"deviceID":"abcd","user":"rick","reminderTime":"something","timestamp":5555}
             db.read(element1).should.be.deep.equal(element1)
         })
     })
@@ -246,7 +207,7 @@ describe('Utility specific tests', function(){
         data = {
             "deviceID":"iPad-4603488219",
             "user":"angie@cpp.edu",
-            "data":[{"notification":"something"}],
+            "reminderTime":"something",
             "timestamp":1494120903705}
     })
     beforeEach(function(){
@@ -278,7 +239,7 @@ describe('Utility specific tests', function(){
     });
     describe('4 Get ID from valid data', function(){    
         it('should be user_dataType', function(){         
-            util.getId(data).should.be.equal('angie@cpp.edu_notification')
+            util.getId(data).should.be.equal('angie@cpp.edu_reminderTime')
         });
     });
     afterEach(function(){
@@ -286,3 +247,41 @@ describe('Utility specific tests', function(){
     after(function(){
     });
 });
+
+// Describe structure of test suite
+// describe('Database tests', function(){
+//     var chaiDB = require('../chaiDB.js');
+//     var db = new chaiDB('../public/testdb.json');
+//     var foo;
+//     var chunks;
+//     var foo;
+//     before(function(){
+//         foo = 'peanut';
+//     });
+//     beforeEach(function(){   
+//     });
+//     describe('#test1', function(){
+//         it('should be length 8', function(){
+//             // Add test data to database
+//             var chunk1 = {deviceID: "Android Tab", user: "angie@cpp.edu", reminderTime: "5:00pm",timestamp: 1};
+//             var chunk2 = {deviceID: "Android Phone", user: "angie@cpp.edu", reminderTime: "2:00pm",timestamp: 1};
+//             var chunk3 = {deviceID: "Apple iPhone", user: "angie@cpp.edu", reminderTime: "1:30pm",timestamp: 5};
+//             var chunk4 = {deviceID: "Apple iPad", user: "angie@cpp.edu", reminderTime: "8:00pm",timestamp: 10};
+//             var chunk5 = {deviceID: "Android Tab", user: "bryan@cpp.edu", reminderTime: "4:00pm",timestamp: 2};
+//             var chunk6 = {deviceID: "Android Phone", user: "bryan@cpp.edu", reminderTime: "12:01pm",timestamp: 2};
+//             var chunk7 = {deviceID: "Apple iPhone", user: "bryan@cpp.edu", reminderTime: "6:01pm",timestamp: 2};
+//             var chunk8 = {deviceID: "Apple iPad", user: "bryan@cpp.edu", reminderTime: "6:01pm",timestamp: 2};
+//             var chunks = [chunk1,chunk2,chunk3,chunk4,chunk5,chunk6,chunk7,chunk8];
+//             chunks.forEach(function(entry){
+//                 db.create(entry);
+//             })
+
+//             chunks.length.should.be.equal(8);
+//         })
+//     });
+//     describe('#test2', function(){
+//         it('should be a string', function(){
+//             foo.should.be.a.string;
+//         });
+//     });
+// });

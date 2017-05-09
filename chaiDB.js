@@ -166,7 +166,7 @@ function message(err, type, value){
         console.log('error: ' + err);
         return
     }
-    console.log(type+' '+value);
+    //console.log(type+' '+value);
 }
 
 
