@@ -69,8 +69,9 @@ function createData(err, type, value, callback){
         callback('error', type + ' cannot create, id already exists')
         return false;
     }
-
+    console.log('before' + JSON.stringify(chaidb))
     chaidb[id] = value
+    console.log('after' + JSON.stringify(chaidb))
     backup(null, saveFile)
     //console.log(type + 'id[' + id + ']: ', value)
     callback(null, type + 'd id[' + id + ']: ', value)
@@ -173,6 +174,7 @@ function backup(err, callback){
 
 // Save db Object to file specified in main location 
 function saveFile(){
+    //console.log('Writing to db file now' + JSON.stringify(chaidb))
     fs.writeFile(fileName, JSON.stringify(chaidb), function(err) {
         if(err) {
             return console.log(err);

@@ -136,14 +136,14 @@
 
                     <div class="col-lg-8">
                         <form id='send-message'>
-                            <div class="input-group">
+                            <!--<div class="input-group">
                                 <div class="input-group-btn">
                                     <button type="button" class="btn btn-default" ng-click="submit('notification', notificationApp1)" data-toggle="tooltip" title="Notification">
                                         <i class="glyphicon glyphicon-time"></i>
                                     </button>
                                 </div>
                                 <input type="text" class="form-control" id='notificationApp1' ng-model="notificationApp1" placeholder="Enter notification"></input>
-                            </div>
+                            </div>-->
                             <div class="input-group">
                                 <div class="input-group-btn">
                                     <button type="button" class="btn btn-default" ng-click="submit('reminder', reminderApp1)" data-toggle="tooltip" title="Reminder">
@@ -156,8 +156,8 @@
                     </div>
 
                     <div class="col-lg-4">
-                        <h4 id="note1Out">{{localdb.notification.data[0].notification}}&nbsp;</h4>
-                        <h4 id="remind1Out">{{localdb.reminder.data[0].reminder}}</h4>
+                        <!--<h4 id="note1Out">{{localdb.notification.data[0].notification}}&nbsp;</h4>-->
+                        <h4 id="remind1Out">{{localdb.reminder.reminderTime}}</h4>
                     </div>
 
                 </div>
@@ -166,14 +166,14 @@
 
                     <div class="col-lg-8">
                         <form id='send-message'>
-                            <div class="input-group">
+                            <!--<div class="input-group">
                                 <div class="input-group-btn">
                                     <button type="button" class="btn btn-default" ng-click="submit('notification', notificationApp2)" data-toggle="tooltip" title="Notification">
                                         <i class="glyphicon glyphicon-time"></i>
                                     </button>
                                 </div>
                                 <input type="text" class="form-control" id='notificationApp2' ng-model="notificationApp2" placeholder="Enter notification">
-                            </div>
+                            </div>-->
 
                             <div class="input-group">
                                 <div class="input-group-btn">
@@ -187,8 +187,8 @@
                     </div>
 
                     <div class="col-lg-4">
-                        <h4 id="note2Out">{{localdb.notification.data[0].notification}}&nbsp;</h4>
-                        <h4 id="remind2Out">{{localdb.reminder.data[0].reminder}}</h4>         
+                        <!--<h4 id="note2Out">{{localdb.notification.data[0].notification}}&nbsp;</h4>-->
+                        <h4 id="remind2Out">{{localdb.reminder.reminderTime}}</h4>         
                     </div>
 
                 </div>
@@ -200,7 +200,7 @@
         <div class="col-lg-6" id="dataqueuediv">
             <h3>Local Database</h3>
             <ul class="list-group">
-                <pre><code>{{localdb.notification}}</code></pre>
+                <!--<pre><code>{{localdb.notification}}</code></pre>-->
                 <pre><code>{{localdb.reminder}}</code></pre>
             </ul>
         </div>
@@ -293,15 +293,14 @@
                     document.getElementById('reminderApp1').value = "";
                     document.getElementById('reminderApp2').value = "";
                     $scope.reminderApp1 = ""
-                    $scope.reminderApp2 = ""
-                    
+                    $scope.reminderApp2 = ""           
                 }
-                if(dataType == 'notification'){
-                    document.getElementById('notificationApp1').value = "";
-                    document.getElementById('notificationApp2').value = "";
-                    $scope.notificationApp1 = ""
-                    $scope.notificationApp2 = ""
-                }     
+                // if(dataType == 'notification'){
+                //     document.getElementById('notificationApp1').value = "";
+                //     document.getElementById('notificationApp2').value = "";
+                //     $scope.notificationApp1 = ""
+                //     $scope.notificationApp2 = ""
+                // }     
                 updateOutputSyncColors()
 
                 // Attempt sending result to server
@@ -313,8 +312,8 @@
 
             // Check localdb sync status and update view
             function updateOutputSyncColors(){
-                if ($scope.localdb == null || $scope.localdb == {})
-                {
+                console.log($scope.localdb)
+                if ($scope.localdb == null || $scope.localdb == {}){
                     return
                 }
                 
@@ -323,21 +322,20 @@
                     document.getElementById("remind2Out").style.color = ($scope.localdb.reminder.synced) ? "black" : "red";
                 }
                 
-                if($scope.localdb.hasOwnProperty('notification')){
-                    document.getElementById("note1Out").style.color = ($scope.localdb.notification.synced) ? "black" : "red";
-                    document.getElementById("note2Out").style.color = ($scope.localdb.notification.synced) ? "black" : "red";
-                }         
+                // if($scope.localdb.hasOwnProperty('notification')){
+                //     document.getElementById("note1Out").style.color = ($scope.localdb.notification.synced) ? "black" : "red";
+                //     document.getElementById("note2Out").style.color = ($scope.localdb.notification.synced) ? "black" : "red";
+                // }         
             }
 
             socket.on('send update', function(serverData){
-                console.log('Data from server: ', JSON.stringify(serverData))
                 var dataType = 'error'
-                if (serverData.data[0].hasOwnProperty('notification')){
-                    dataType = 'notification'
-                }
-                else if (serverData.data[0].hasOwnProperty('reminder')){
+                if (serverData.hasOwnProperty('reminderTime')){
                     dataType = 'reminder'
                 }
+                // else if (serverData.data[0].hasOwnProperty('notification')){
+                //     dataType = 'notification'
+                // }
                 $scope.localdb[dataType] = serverData
                 setTimeout(function(){
                     if (true){
@@ -345,7 +343,7 @@
                     }
                 }, 1000)
             })
-
+            
             socket.on('success', function(data){
                 console.log('success: ' + data[0] + ' ' + data[1]);
                 // Update local from db
@@ -367,17 +365,17 @@
                 var result = {
                     deviceID: $scope.selectedDevice,
                     user: $scope.selectedUser.user,
-                    data: [],
+                    reminderTime: "",
                     timestamp: new Date().getTime(),
                     synced: false
                 };
-                
-                if(type === 'notification'){
-                    result.data.push({notification: value})
+ 
+                if(type === 'reminder'){
+                    result.reminderTime = value
                 }
-                else if(type === 'reminder'){
-                    result.data.push({reminder: value})
-                }
+                // else if(type === 'notification'){
+                //     result.data.push({reminder: value})
+                // }
                 return result; 
             }
 

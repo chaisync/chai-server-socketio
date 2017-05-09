@@ -20,8 +20,11 @@ app.use(express.static(__dirname + '/public'));
 var fs = require('fs'); //             <-- TODO: move to chaiDB.js module
 
 // Database
-var chaiDB = require('./chaiDB.js');
-var db = new chaiDB('./chaidb.json');
+//var chaiDB = require('./chaiDB.js'); //<-- array style db
+//var db = new chaiDB('./chaidb.json');//<-- array style db
+var chaiDictDB = require('./chaiDictDB.js')
+var db = new chaiDictDB('./public/db.json')
+db.loadFromFile()
 
 // Connection list
 var connList = require('./connList.js');
@@ -54,45 +57,38 @@ io.sockets.on('connection', function(socket){
         io.sockets.connected[socket.id].emit('new message', data)
     })
 
-    socket.on('request update', function(data){
-        if(data == null){
+    socket.on('request update', function(clientData){
+        if(clientData == null){
             statusMsgToClient(1, 'No data received on server.');
             return;
         }
+        var latestData
 
-        console.log('Client: ' + socket.id);
-        console.log('Data from client: ', JSON.stringify(data))
-        console.log('USer: ', data.user)
-        
-        var clientBehind = true
-        // TODO: read from serverdb
-        var serverData = db.findByUserAndDataType(data)
-        if (serverData.length == 0){
-            clientBehind = false 
-        }
-        console.log(JSON.stringify(serverData))
-        // TODO: compare client data to server db
-        
-        if (clientBehind){
-            // emit update(server db synced = true)
-            data.synced = true
-            io.sockets.connected[socket.id].emit('send update', data)
-            return    
-        }
-        // TODO: modify -> synced = true
-        data.synced = true
-        // TODO: create or update client data -> server db
-        if (db.findByUserAndDataType(data).length == 0){
-            db.create(data)
+        // Compare device data with server data
+        if(db.contains(clientData)){
+            var serverVersion = db.read(clientData)
+            
+            // If server behind 
+            if (serverVersion.timestamp < clientData.timestamp){
+                clientData.synced = true
+                db.update(clientData)
+                latestData = clientData
+            }
+            else{  // Client behind
+                serverVersion.synced = true
+                db.update(serverVersion)
+                latestData = serverVersion
+            }  
         }
         else{
-            db.update(data)
+            clientData.synced = true
+            latestData = clientData
         }
-        backupDatabase()
-        // TODO: read from serverdb
 
-        // TODO: emit update(server db synced=true)
-        io.sockets.connected[socket.id].emit('send update', data)
+        // Emit update to original client
+        io.sockets.connected[socket.id].emit('send update', latestData)
+
+        console.log(db.toString())
         // TODO: broadcast to all user-devices
 
     })
