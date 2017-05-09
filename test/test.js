@@ -112,7 +112,7 @@ describe('Connection list specific tests', function(){
     });
 });
 
-describe.only('ChaiDictDB specific tests', function(){
+describe('ChaiDictDB specific tests', function(){
     var mainFile
     var testFile
     var chaiDB
@@ -217,22 +217,13 @@ describe.only('ChaiDictDB specific tests', function(){
             db.delete(baddata1).should.equal(false)
         });
     });
-    // describe('13 Create valid data ', function(){    
-    //     it('should save to file', function(){
-    //         var fs = require('fs');
-    //         var dat1 = {"user":"a","data":[{"notification":"something"}],"deviceID":"", "timestamp":1}
-    //         var dat2 = {"user":"b","data":[{"notification":"something"}],"deviceID":"", "timestamp":1}
-                           
-    //         var content;
-    //         fs.readFile(testFile, function (err, data) {
-    //             if (err) { throw err;}
-    //             console.log(data);
-    //         });
-    //     });
-    // });
-    describe.only('13 Load initial database', function(){
+    describe('13 Load initial database', function(){
         it('should load from a file', function(){
+            var fileName = 'test/testonly.json'
+            db.setMain(fileName)
             db.loadFromFile()
+            var element1 = {"deviceID":"abcd","user":"rick","data":[{"notification":"something"}],"timestamp":5555}
+            db.read(element1).should.be.deep.equal(element1)
         })
     })
     afterEach(function(){

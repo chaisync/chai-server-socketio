@@ -31,14 +31,8 @@ module.exports = function(main){
 
     // 
     this.loadFromFile = function(){
-        console.log('in loadFromFile')
-        fs.readFile('public/junk.json', function (err,data) {
-            if (err) {
-                console.log(err);
-            }
-            console.log(data);
-        });
-        console.log('done loadFromFile')
+        var text = fs.readFileSync(fileName).toString('utf-8');
+        chaidb = JSON.parse(text)
     }
 
     // Implement CRUD for database
