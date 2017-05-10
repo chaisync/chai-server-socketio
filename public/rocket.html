@@ -1,0 +1,91 @@
+<html>
+   
+<head>
+	<title>Rocket</title>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">	
+	
+	<!-- Include Bootstrap -->
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+
+	<script type="text/javascript">
+		var imgObj = null;
+		var animate;
+		var toggle = true
+		
+		function init(){
+			imgObj1 = document.getElementById('myImage1');
+			imgObj2 = document.getElementById('myImage2');
+			imgObj3 = document.getElementById('myImage3');
+			textObj = document.getElementById('myCourse');
+			imgObj1.style.position= 'relative'; 
+			imgObj1.style.left = '0px'; 
+			move()
+		}
+		
+		function move(){
+			if (textObj.innerHTML != "Human Computer Interaction"){
+				return
+			}
+			imgObj1.src = (toggle == true) ? "images/rocketa.gif" : "images/rocketb.gif"
+			imgObj2.src = (toggle == true) ? 'images/star1.jpg' : 'images/star2.jpg'
+			imgObj3.src = (toggle == true) ? 'images/star2.jpg' : 'images/star1.jpg'
+			toggle = !toggle
+			animate = setTimeout(move,1500);
+		}
+		
+		window.onload = init;
+	</script>
+	
+	<!-- Custom style -->
+	<style>
+		#myApp {
+			padding: 10px;
+			color: white;
+			background: #1D213A; 
+		}
+		
+		#myRocket {
+			padding: 10px;
+			/*width: 800px;*/
+			height: 350px;
+			position: relative;
+			background: #1D213A;
+			color: white;
+		}
+
+		.jumbotron{
+			background-color: #3164b7;
+		}
+	</style>
+</head>
+   
+<body>
+	<div class="mt-5 container-fluid" id="myApp">		
+		<div class="jumbotron">
+			<h1>CS 5<sup>7</sup>0</h1> 
+			<h2 id="myCourse">Human Commuter Infraction</h2> 
+			<h1 align="center">CircleCI</h1> 
+		</div>
+	</div>
+
+	<div class="mt-5 container-fluid">
+		<div class=row>
+			<div class="col-lg-4" id="myRocket">
+				<img id="myImage2" src="images/star1.jpg" />
+			</div>
+			<div class="col-lg-4" id="myRocket">
+				
+				<h1>&nbsp;<br>&nbsp;</h1>
+				<img id="myImage1" src="images/rocketa.gif" />
+			</div>
+			<div class="col-lg-4" id="myRocket">
+				<img id="myImage3" src="images/star2.jpg" />
+			</div>
+		</div>
+	</div>
+
+</body>
+</html>
