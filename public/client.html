@@ -305,8 +305,8 @@
 
                 // Attempt sending result to server
                 if($scope.connected == true) {
-                    //socket.emit('send message', result);
-                    socket.emit('request update', result)
+                    socket.emit('send message', result);
+                    //socket.emit('request update', result)
                 }
             };
 
@@ -327,7 +327,7 @@
                 // }         
             }
 
-            socket.on('send update', function(serverData){
+            socket.on('new message', function(serverData){
                 console.log('Update from server: ' + JSON.stringify(serverData))
                 var dataType = 'error'
                 if (serverData.hasOwnProperty('reminderTime')){
@@ -344,6 +344,23 @@
                 }, 1000)
             })
             
+            socket.on('send update', function(serverData){
+                console.log('Update from server: ' + JSON.stringify(serverData))
+                var dataType = 'error'
+                if (serverData.hasOwnProperty('reminderTime')){
+                    dataType = 'reminder'
+                }
+                // else if (serverData.data[0].hasOwnProperty('notification')){
+                //     dataType = 'notification'
+                // }
+                $scope.localdb[dataType] = serverData
+                setTimeout(function(){
+                    if (true){
+                        updateOutputSyncColors()
+                    }
+                }, 1000)
+            })
+
             socket.on('success', function(data){
                 console.log('success: ' + data[0] + ' ' + data[1]);
                 // Update local from db

@@ -38,60 +38,61 @@ app.get('/', function(req, res){
 
 // Serve all client websocket messages 
 io.sockets.on('connection', function(socket){
+    // Loop back test only, sends data to all clients
     socket.on('send message', function(data){
         if(data == null){
             statusMsgToClient(1, 'No data received on server.');
             return;
         }
-        saveToDatabase(null, data, statusMsgToClient);
 
-        // TO DO: change emit to send only to user's devices
-        socket.emit('new message', data);
-        //socket.broadcast.emit('new message', data)
-
-        // Experiment to loop back to single client
-        // All connecitons: Object.keys(io.sockets.sockets)
-        // Single connection: 
-        console.log('Client: ' + socket.id);
-        //console.log('Client: ' + socketid + ' sent data' + JSON.stringify(data));
+        data.synced = true
+        // Send to original client
         io.sockets.connected[socket.id].emit('new message', data)
+        // Send to all other client devices (FIX LATER)
+        socket.broadcast.emit('new message', data);
     })
 
     socket.on('request update', function(clientData){
-        console.log('Client requests update: ' + clientData.user + ' on ' + socket.id);
-        if(clientData == null){
-            statusMsgToClient(1, 'No data received on server.');
-            return;
-        }
-        var latestData
+        // console.log(clientData.user + ' requests update on ' + socket.id);
+        
+        // if(clientData == null){
+        //     statusMsgToClient(1, 'No data received on server.');
+        //     return;
+        // }
+        
+        // latestData(clientData, function(){
+        //     // Emit update to original client
+        //     io.sockets.connected[socket.id].emit('send update', latestData)   
+        //     conn.set(latestData.user, latestData.deviceID, socket.id)
+        //     console.log('Connections: ' + JSON.stringify(conn.get()))
+        //     // TODO: broadcast to all user-devices
+        // })
 
-        // Compare device data with server data
-        if(db.contains(clientData)){
-            var serverVersion = db.read(clientData)
-            
-            // If server behind 
-            if (serverVersion.timestamp < clientData.timestamp){
-                clientData.synced = true
-                db.update(clientData)
-                latestData = clientData
-            }
-            else{  // Client behind
-                serverVersion.synced = true
-                db.update(serverVersion)
-                latestData = serverVersion
-            }  
-        }
-        else{
-            clientData.synced = true
-            latestData = clientData
-        }
-
-        // Emit update to original client
-        io.sockets.connected[socket.id].emit('send update', latestData)
-
-        console.log(db.toString())
-        // TODO: broadcast to all user-devices
-
+        // var latestData = function(clientData, callback){
+        //     // Compare device data with server data
+        //     if(db.contains(clientData)){
+        //         var serverVersion = db.read(clientData)
+                
+        //         // If server behind 
+        //         if (serverVersion.timestamp < clientData.timestamp){
+        //             clientData.synced = true
+        //             db.update(clientData)
+        //             callback()
+        //             return clientData
+        //         }
+        //         else{  // Client behind
+        //             serverVersion.synced = true
+        //             db.update(serverVersion)
+        //             callback()
+        //             return serverVersion
+        //         }  
+        //     }
+        //     else{
+        //         clientData.synced = true
+        //         callback()
+        //         return clientData
+        //     }
+        // }
     })
 
     // Save to database
