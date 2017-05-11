@@ -56,6 +56,14 @@ io.sockets.on('connection', function(socket){
         io.sockets.connected[socket.id].emit('new message', jsonString)
         // Send to all other client devices (FIX LATER)
         socket.broadcast.emit('new message', jsonString);
+        
+        // Backup database to file
+        fs.appendFile('public/db.json', dataObject, function(err) {
+            if(err) {
+                return console.log(err);
+            }
+            console.log("Database file updated.");
+        });
     })
 
     socket.on('request update', function(clientData){
