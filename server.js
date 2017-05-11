@@ -58,12 +58,12 @@ io.sockets.on('connection', function(socket){
         socket.broadcast.emit('new message', jsonString);
         
         // Backup database to file
-        fs.appendFile('public/db.json', dataObject, function(err) {
-            if(err) {
-                return console.log(err);
-            }
-            console.log("Database file updated.");
-        });
+        // fs.appendFile('public/db.json', dataObject, function(err) {
+        //     if(err) {
+        //         return console.log(err);
+        //     }
+        //     console.log("Database file updated.");
+        // });
     })
 
     socket.on('request update', function(clientData){
