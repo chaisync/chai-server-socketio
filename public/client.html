@@ -201,7 +201,7 @@
             <h3>Local Database</h3>
             <ul class="list-group">
                 <!--<pre><code>{{localdb.notification}}</code></pre>-->
-                <pre><code>{{localdb.reminder}}</code></pre>
+                <pre><code id="remindLocaldb">{{localdb.reminder}}</code></pre>
             </ul>
         </div>
 
@@ -280,7 +280,7 @@
             // Submit data to localdb and send to server
             $scope.submit = function(dataType, dataValue){
                 if (validateForm(dataValue) == false){
-                    alert("Please anter a value.");
+                    alert("Please enter a value.");
                     return
                 }
                 
@@ -305,7 +305,7 @@
 
                 // Attempt sending result to server
                 if($scope.connected == true) {
-                    socket.emit('send message', result);
+                    socket.emit('send message', JSON.stringify(result));
                     //socket.emit('request update', result)
                 }
             };
@@ -315,7 +315,6 @@
                 if ($scope.localdb == null || $scope.localdb == {}){
                     return
                 }
-                
                 if($scope.localdb.hasOwnProperty('reminder')){
                     document.getElementById("remind1Out").style.color = ($scope.localdb.reminder.synced) ? "black" : "red";
                     document.getElementById("remind2Out").style.color = ($scope.localdb.reminder.synced) ? "black" : "red";
@@ -328,15 +327,19 @@
             }
 
             socket.on('new message', function(serverData){
-                console.log('Update from server: ' + JSON.stringify(serverData))
+                var serverObj = JSON.parse(serverData)
                 var dataType = 'error'
-                if (serverData.hasOwnProperty('reminderTime')){
+                if (serverObj.hasOwnProperty('reminderTime')){
                     dataType = 'reminder'
                 }
                 // else if (serverData.data[0].hasOwnProperty('notification')){
                 //     dataType = 'notification'
                 // }
-                $scope.localdb[dataType] = serverData
+                
+                $scope.localdb[dataType] = JSON.parse(serverData)
+                console.log('Localdb = ' + JSON.stringify($scope.localdb[dataType]))
+                
+                
                 $scope.$apply()
                 setTimeout(function(){
                     if (true){

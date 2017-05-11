@@ -44,12 +44,18 @@ io.sockets.on('connection', function(socket){
             statusMsgToClient(1, 'No data received on server.');
             return;
         }
+        dataObject = JSON.parse(data)
+        dataObject.synced = true
+        jsonString = JSON.stringify(dataObject)
 
-        data.synced = true
+        //console.log(data)    
+        //console.log(dataObject)
+        //console.log(jsonString)
+
         // Send to original client
-        io.sockets.connected[socket.id].emit('new message', data)
+        io.sockets.connected[socket.id].emit('new message', jsonString)
         // Send to all other client devices (FIX LATER)
-        socket.broadcast.emit('new message', data);
+        socket.broadcast.emit('new message', jsonString);
     })
 
     socket.on('request update', function(clientData){
