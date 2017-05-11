@@ -337,6 +337,7 @@
                 //     dataType = 'notification'
                 // }
                 $scope.localdb[dataType] = serverData
+                $scope.$apply()
                 setTimeout(function(){
                     if (true){
                         updateOutputSyncColors()
