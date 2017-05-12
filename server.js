@@ -47,6 +47,8 @@ io.sockets.on('connection', function(socket){
         if(typeof dataStr === 'string'){
             dataObj = JSON.parse(dataStr)
         } 
+        console.log('the type is: '+typeof dataStr)
+        console.log(JSON.parse(dataStr))
         
         // Sync with database
         if(db.contains(dataObj)){
