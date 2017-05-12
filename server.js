@@ -44,7 +44,9 @@ io.sockets.on('connection', function(socket){
             statusMsgToClient(1, 'No data received on server.');
             return;
         }
-        dataObj = JSON.parse(dataStr)
+        if(typeof dataStr === 'string'){
+            dataObj = JSON.parse(dataStr)
+        } 
         
         // Sync with database
         if(db.contains(dataObj)){
