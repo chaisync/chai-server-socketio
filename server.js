@@ -40,6 +40,8 @@ app.get('/', function(req, res){
 
 // Serve all client websocket messages 
 io.sockets.on('connection', function(socket){
+    console.log('New connection: ' + socket.id)
+
     socket.on('send message', function(data){
         console.log('server got ' + data)
         socket.emit('new message', data)
