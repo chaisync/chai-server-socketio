@@ -27,7 +27,7 @@ var db = new chaiDictDB('./public/db.json')
 db.loadFromFile()
 
 // Connection list
-var connList = require('./connList.js');
+var connList = require('./utils/connDict.js');
 var conn = new connList();
 
 // Route all incoming http 
@@ -39,31 +39,26 @@ app.get('/', function(req, res){
 // Serve all client websocket messages 
 io.sockets.on('connection', function(socket){
     // Loop back test only, sends data to all clients
-    socket.on('send message', function(data){
-        if(data == null){
+    socket.on('send message', function(dataStr){
+        if(dataStr == null){
             statusMsgToClient(1, 'No data received on server.');
             return;
         }
-        dataObject = JSON.parse(data)
-        dataObject.synced = true
-        jsonString = JSON.stringify(dataObject)
-
-        //console.log(data)    
-        //console.log(dataObject)
-        //console.log(jsonString)
+        dataObj = JSON.parse(dataStr)
+        
+        // Sync with database
+        if(db.contains(dataObj)){
+            db.update(dataObj)
+        }
+        else{
+            db.create(dataObj)
+        }
+        dataObj.synced = true
 
         // Send to original client
-        io.sockets.connected[socket.id].emit('new message', jsonString)
+        io.sockets.connected[socket.id].emit('new message', JSON.stringify(dataObj))
         // Send to all other client devices (FIX LATER)
-        socket.broadcast.emit('new message', jsonString);
-        
-        // Backup database to file
-        // fs.appendFile('public/db.json', dataObject, function(err) {
-        //     if(err) {
-        //         return console.log(err);
-        //     }
-        //     console.log("Database file updated.");
-        // });
+        socket.broadcast.emit('new message', JSON.stringify(dataObj));
     })
 
     socket.on('request update', function(clientData){
@@ -140,6 +135,11 @@ io.sockets.on('connection', function(socket){
         console.log('disconnect: ' + Object.keys(io.sockets.sockets));
     });
 
+    socket.on('loopback test', function(data){
+        console.log('server got ' + data)
+        socket.emit('loopback response', data)
+    })
+
     // Search db by timestamp and return data element to client
     function getDataByTimestamp(timestamp, callback){
         console.log('Database entry requested: ' + JSON.stringify(timestamp));
@@ -183,7 +183,7 @@ io.sockets.on('connection', function(socket){
     function backupDatabase(){
         // Backup database to file
         fs.writeFile('public/db.json', db.toString(), function(err) {
-            if(err) {
+            if(err) {s
                 return console.log(err);
             }
             console.log("Database file updated.");
@@ -191,3 +191,4 @@ io.sockets.on('connection', function(socket){
     }
 })
 
+exports.db = db

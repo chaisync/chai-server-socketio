@@ -1,20 +1,20 @@
-util = require('./util.js')
+util = require('./utils/util.js')
 var fs = require('fs');
 var fileName
 
 // The database/mapping structure 
 var chaidb = {};
 
-module.exports = function(main){
-    fileName = main;
+module.exports = function(file){
+    fileName = file;
     
     // Setters
-    this.setMain = function(main){
-        fileName = main;
+    this.setFile = function(file){
+        fileName = file;
     }
 
     // Getters
-    this.getMain = function(){
+    this.getFile = function(){
         return fileName;
     }
 
@@ -24,15 +24,24 @@ module.exports = function(main){
         return (chaidb.hasOwnProperty(id))
     }
 
+    // Load from file
+    this.loadFromFile = function(){
+        var text = fs.readFileSync(fileName).toString('utf-8');
+        if (text == ''){
+            chaidb = {}
+            return
+        }
+        chaidb = JSON.parse(text)
+    }
+    
     // Return db to string
     this.toString = function(){
         return JSON.stringify(chaidb)
     }
 
-    // 
-    this.loadFromFile = function(){
-        var text = fs.readFileSync(fileName).toString('utf-8');
-        chaidb = JSON.parse(text)
+    // Return size of database
+    this.size = function(){
+        return Object.keys(chaidb).length
     }
 
     // Implement CRUD for database
@@ -53,21 +62,18 @@ module.exports = function(main){
 // Create new data element in db
 function createData(err, type, value, callback){
     if(err){
-        callback('error', err)
-        return false;
+        return callback('error', err)
     }
     
     // If cannot find id, exit
     var id = util.getId(value)
     if(id == null){
-        callback('error', type + ' cannot create, id not valid')
-        return false;
+        return callback('error', type + ' cannot create, id not valid')
     }
 
     // If id already exists, cannot create, exit
     if(chaidb.hasOwnProperty(id)){
-        callback('error', type + ' cannot create, id already exists')
-        return false;
+        return callback('error', type + ' cannot create, id already exists')
     }
     chaidb[id] = value
     backup(null, saveFile)
@@ -78,85 +84,72 @@ function createData(err, type, value, callback){
 // Read data element in db
 function readById(err, type, value, callback){
     if(err){
-        callback('error', err)
-        return null;
+        return callback('error', err)
     }
 
     // If cannot find id, exit
     var id = util.getId(value)
     if(id == null){
-        callback('error', type + ' cannot read, id not valid')
-        return null;
+        return callback('error', type + ' cannot read, id not valid')
     }
 
     // If id exists return value
     if(chaidb.hasOwnProperty(id)){
-        callback(null, type + ' ' + id)
         return chaidb[id];
     }
     else{
-        callback('error', type + ' tried but id[' + id + '] not found')
-        return null
+        return callback('error', type + ' tried but id[' + id + '] not found')
     }
 }
 
 // Update
 function updateData(err, type, value, callback){
     if(err){
-        callback('error', err)
-        return false;
+        return callback('error', err)
     }
 
     // If cannot find id, exit
     var id = util.getId(value)
     if(id == null){
-        callback('error', type + ' cannot update, id not valid')
-        return false;
+        return callback('error', type + ' cannot update, id not valid')
     }
 
     // If id doesn't exist, cannot update, exit
     if(!chaidb.hasOwnProperty(id)){
-        callback('error', type + ' cannot update, id does not exist')
-        return false;
+        return callback('error', type + ' cannot update, id[' + id + '] not found')
     }
 
     chaidb[id] = value
     backup(null, saveFile)
-    //console.log(type + 'id[' + id + ']: ', value)
-    callback(null, type + 'd id[' + id + ']: ', value)
-    return true;
+    return true
 }
 
 // Delete
 function deleteData(err, type, value, callback){
     if(err){
-        callback('error', err)
-        return false;
+        return callback('error', err)
     }
 
     // If cannot find id, exit
     var id = util.getId(value)
     if(id == null){
-        callback('error', type + ' cannot delete, id not valid')
-        return false;
+        return callback('error', type + ' cannot delete, id not valid')
     }
 
     // If id doesn't exist, cannot delete, exit
     if(!chaidb.hasOwnProperty(id)){
-        callback('error', type + ' cannot delete, id does not exist')
-        return false;
+        return callback('error', type + ' cannot delete, id does not exist')
     }
 
     delete chaidb[id]
     backup(null, saveFile)
-    callback(null, type + 'ed id[' + id + ']: ', value)
     return true;
 }
 
 function message(err, type, value){
     if(err){
-        console.log('error: ' + type);
-        return
+        //console.log('error: ' + type);
+        return 'error: ' + type
     }
     //console.log(type+' '+JSON.stringify(value));
 }
@@ -178,18 +171,3 @@ function saveFile(){
         }
     })
 }
-
-// Load db Object from file specified in main location 
-// function readContent(callback){
-//     fs.readFile('public/junk.json', function (err, data) {
-//         if (err) { 
-//             return callback(err)
-//         }
-//         callback(null, data)
-//     });
-// }
-
-// function load(file, callback){
-//     var contents = callback(file)
-//     return contents
-// }

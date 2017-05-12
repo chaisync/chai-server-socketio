@@ -8,68 +8,118 @@ describe('Http specific tests', function(){
     });
 });
 
-describe('Socket.io specific tests', function(){
-    describe('#test1', function(){
-        it('should test something socket.io');
+describe('Socket.io Server specific tests', function(){
+    var db = require('../server.js').db
+    var io = require('socket.io-client')
+    //var socketUrl = 'http://localhost:5000';
+    var socketUrl = 'http://localhost:8080';
+    var options = {  
+        transports: ['websocket'],
+        'force new connection': true
+    };
+    
+    describe.only('socket on loopback test', function(){
+        it('should respond back same data as original client emit data', function(done){
+            var user1 = {'name':'bob@abc.com'}
+            client1 = io.connect(socketUrl, options)
+
+            client1.on('connect', function(data){
+                client1.emit('loopback test', user1)
+            })
+            
+            client1.on('loopback response', function(data){
+                data.should.deep.equal(user1)
+                client1.disconnect()
+                done()
+            })
+        });
+    });
+    describe('socket on send message', function(){
+        it('should respond back data with {synced:true}', function(done){
+            var origData1 = {
+                "deviceID":"abcd",
+                "user":"bob",
+                "reminderTime":"something",
+                "timestamp":1234}
+            var syncedData1 = JSON.parse(JSON.stringify(origData1))
+            
+            syncedData1['synced'] = true
+            
+            client1 = io.connect(socketUrl, options)
+
+            client1.on('connect', function(data){
+                client1.emit('send message', JSON.stringify(origData1))
+            })
+            
+            client1.on('new message', function(data){
+                JSON.parse(data).should.deep.equal(syncedData1)
+                //console.log(db.read(origData1))
+                client1.disconnect()
+                done()
+            })
+        });
     });
 });
 
-describe('Connection list specific tests', function(){
-    var connList = require('../connList.js')
-    var conn = new connList()
-    var user
-    var device1, device2
-    var connection1, connection2
+describe('Connection Dictionary specific tests', function(){
+    var connDict = require('../utils/connDict.js')
+    var conn = new connDict()
+    var user1, user2
+    var user1device1, user1device2, user2device1, user2device2
+    var connection1, connection2, connection3, connection4
     before(function(){
-        user = 'bob'
-        device1 = 'Galaxy'
-        connection1 = '1234abcd'
-        device2 = 'iPhone'
-        connection2 = '5678efgh'
-        connection2b = '9999zzzz'
+        user1 = 'ann'
+        user2 = 'bob'
+        user3 = 'zac'
+        user1device1 = 'Phone1'
+        user1device2 = 'Tablet1'
+        user2device1 = 'Phone2'
+        user2device2 = 'Tablet2' 
+        connection1 = 'a1111111'
+        connection2 = 'b2222222'
+        connection3 = 'c3333333'
+        connection4 = 'd4444444'
     })
-    describe('1 Get user from empty dict', function(){
-        it('should return empty string', function(){
-            var result = conn.get(user)
-            result.should.be.equal('')
+    describe('1 Empty dictionary', function(){
+        it('should have size 0', function(){
+            conn.size().should.be.equal(0)
         });
     });
-    describe('2 Set an initial connection', function(){
-        it('should add array of one connection', function(){
-            conn.set(user, device1, connection1)
-            var ary = []
-            ary.push({device:device1, connection:connection1})
-            var result = conn.get(user)
-            result.should.be.deep.equal(ary)
+    describe('2 Add an initial connection', function(){
+        it('should return length 1', function(){
+            var count = conn.size()
+            conn.addConnection(user1, user1device1, connection1)
+            conn.size().should.be.equal(count+1)
         });
     });
-    describe('3 Set a second connection', function(){
-        it('should add to array of connections', function(){
-            conn.set(user, device2, connection2)
-            var ary = []
-            ary.push({device:device1, connection:connection1})
-            ary.push({device:device2, connection:connection2})
-            var result = conn.get(user)
-            result.should.be.deep.equal(ary)
+    describe('3 Delete sole connection', function(){
+        it('should return true and length 0', function(){
+            conn.deleteConnection(user1).should.be.equal(true)
+            conn.size().should.be.equal(0)
+            conn.deleteConnection(user1).should.be.equal(false)
+            conn.deleteConnection(user2).should.be.equal(false)
         });
     });
-    describe('4 Set an existing device with new connection', function(){
-        it('should change array of device connection', function(){
-            conn.set(user, device2, connection2b)
-            var ary = []
-            ary.push({device:device1, connection:connection1})
-            ary.push({device:device2, connection:connection2b})
-            var result = conn.get(user)
-            result.should.be.deep.equal(ary)
+    describe('4 Delete connections not in dictionary', function(){
+        it('should return false', function(){
+            conn.size().should.be.equal(0)
+            conn.deleteConnection(user1).should.be.equal(false)
+            conn.deleteConnection(user2).should.be.equal(false)
         });
     });
-    describe('5 Get user from populated dict', function(){
-        it('should return array of device-connection Objects', function(){
-            var result = conn.get(user)
-            var ary = []
-            ary.push({device:device1, connection:connection1})
-            ary.push({device:device2, connection:connection2b})
-            result.should.be.deep.equal(ary)
+    describe('5 Find All User Connections', function(){
+        it('should return array of connections', function(){
+            conn.addConnection(connection1, user1, user1device1)
+            conn.addConnection(connection2, user1, user1device2)
+            conn.addConnection(connection3, user2, user2device1)
+            resultUser1 = [connection1, connection2]
+            resultUser2 = [connection3]
+            resultUser3 = []
+
+            conn.size().should.be.equal(3)
+            conn.findAllUserConnections(user1).should.be.deep.equal(resultUser1)
+            conn.findAllUserConnections(user2).should.be.deep.equal(resultUser2)
+            conn.findAllUserConnections(user3).should.be.deep.equal(resultUser3)
         });
     });
 });
@@ -82,10 +132,10 @@ describe('ChaiDictDB specific tests', function(){
     var validdata1, validdata2, baddata1
     var util
     before(function(){
-        mainFile = './public/maindb.json'
-        testFile = './public/testdb.json'
+        mainFile = './test/test_doNotModify.json'
+        testFile = './test/test.json'
         chaiDB = require('../chaiDictDB.js')
-        util = require('../util.js')
+        util = require('../utils/util.js')
     })
     beforeEach(function(){
         db = new chaiDB(testFile)
@@ -105,86 +155,114 @@ describe('ChaiDictDB specific tests', function(){
             "reminderTime":"something",
             "timestamp":1234}
     });
-    describe('1 Get main file and get using file', function(){    
-        it('should be the same', function(){         
-            db.getMain().should.be.equal(testFile)
-            db.setMain(mainFile)
-            db.getMain().should.be.equal(mainFile)
-            db.setMain(testFile)
-            db.getMain().should.be.equal(testFile)
+    describe('Get file', function(){    
+        it('should be the current file path and name', function(){         
+            db.getFile().should.be.equal(testFile)
+            db.getFile().should.not.be.equal(mainFile)
         });
     });
-    describe('2 Create a valid data db entry', function(){    
-        it('should create a new property and return true', function(){         
+    describe('Set file', function(){    
+        it('should change the file path and name', function(){         
+            db.setFile(mainFile)
+            db.getFile().should.be.equal(mainFile)
+            db.setFile(testFile)
+            db.getFile().should.be.equal(testFile)
+        });
+    });
+    describe('Contains data', function(){    
+        it('should return true if data exists in db', function(){         
+            db.create(validdata1)
+            db.contains(validdata1).should.equal(true)
+        });
+        it('should return false if data not in db', function(){         
+            db.delete(validdata1)
+            db.contains(validdata1).should.equal(false)
+        });
+    });
+    describe('Create data', function(){    
+        it('should create return true on valid data', function(){         
             db.create(validdata1).should.be.equal(true)
             db.contains(validdata1).should.be.equal(true)
             db.contains(validdata2).should.be.equal(false)
         });
-    });
-    describe('3 Create a valid data db entry 2 times', function(){    
-        it('should return false and error message', function(){      
-            db.create(validdata1).should.be.equal(false)
+        it('should return error message on duplicate data', function(){      
+            var message = 'error: create cannot create, id already exists'
+            db.create(validdata1).should.be.equal(message)
+        });
+        it('should return error message on invalid data', function(){
+            var message = 'error: create cannot create, id not valid'   
+            db.create(baddata1).should.be.equal(message)
         });
     });
-    describe('4 Create from invalid data', function(){    
-        it('should return false and error message', function(){      
-            db.create(baddata1).should.be.equal(false)
-        });
-    });
-    describe('5 Read data with valid id', function(){    
-        it('should return value', function(){
+    describe('Read data', function(){    
+        it('should return value on valid data request', function(){
             db.read(validdata1).should.be.deep.equal(validdata1)
         });
-    });
-    describe('6 Read data with null id', function(){    
-        it('should return null and error message', function(){
-            should.not.exist(db.read(null))
+        it('should return error message on incorrect or missing properties', function(){
+            var message = 'error: read cannot read, id not valid'
+            db.read(null).should.be.equal(message)
+            db.read(baddata1).should.be.equal(message)
+        });
+        it('should return error message on not in database', function(){
+            var id = util.getId(validdata2)
+            var message = 'error: read tried but id['+ id +'] not found'
+            db.read(validdata2).should.be.equal(message)
         });
     });
-    describe('7 Read data with invalid id', function(){    
-        it('should return null and error message', function(){
-            should.not.exist(db.read('not_in_db'))
-        });
-    });
-    describe('8 Update data with valid id', function(){    
-        it('should return true', function(){
-            validdata1.timestamp = 5555
+    describe('Update data', function(){    
+        it('should return true on valid data', function(){
+            var value = 5555
+            validdata1.timestamp = value
             db.update(validdata1).should.equal(true)
+            db.read(validdata1).timestamp.should.equal(value)
         });
-    });
-    describe('9 Update data with invalid id', function(){    
-        it('should return false and error message', function(){
-            baddata1.timestamp = 5555
-            db.update(baddata1).should.equal(false)
+        it('should return error message on missing or incorrect properties', function(){
+            var message = 'error: update cannot update, id not valid'
+            db.update(null).should.be.equal(message)
+            db.update(baddata1).should.be.equal(message)
         });
-    });
-    describe('10 Delete data with valid id', function(){    
-        it('should return true', function(){
+        it('should return error message on not in database', function(){
             var id = util.getId(validdata2)
+            var message = 'error: update cannot update, id['+ id +'] not found'
+            db.update(validdata2).should.be.equal(message)
+        });
+    });
+    describe('Delete data', function(){    
+        it('should return true on valid data', function(){
             db.create(validdata2)
             db.delete(validdata2).should.equal(true)
         });
-    });
-    describe('11 Delete data twice with valid id ', function(){    
-        it('should return false and error message', function(){
-            var id = util.getId(validdata2)
-            db.create(validdata2)
-            db.delete(validdata2).should.equal(true)
-            db.delete(validdata2).should.equal(false)
+        it('should return error message on missing or incorrect properties', function(){
+            var message = 'error: delete cannot delete, id not valid'
+            db.delete(baddata1).should.equal(message)
+        });
+        it('should return error message on not in database', function(){
+            var message = 'error: delete cannot delete, id does not exist'
+            db.delete(validdata2).should.equal(message)
         });
     });
-    describe('12 Delete data with invalid id ', function(){    
-        it('should return false and error message', function(){
-            db.delete(baddata1).should.equal(false)
-        });
-    });
-    describe('13 Load initial database', function(){
-        it('should load from a file', function(){
-            var fileName = 'test/testonly.json'
-            db.setMain(fileName)
+    describe('Load from file', function(){
+        it('should read a blank file and create empty JS Object', function(){
+            var fileName = 'test/testdb_noObject.json'
+            db.setFile(fileName)
+            db.loadFromFile()
+            db.size().should.be.equal(0)
+        })
+        it('should read a file with empty object and parse into JS Object', function(){
+            var fileName = 'test/testdb_noObject.json'
+            db.setFile(fileName)
+            db.loadFromFile()
+            db.size().should.be.equal(0)
+        })
+        it('should read a string from a file and parse into JS Object', function(){
+            var fileName = 'test/testdb_doNotModify.json'
+            db.setFile(fileName)
             db.loadFromFile()
             var element1 = {"deviceID":"abcd","user":"rick","reminderTime":"something","timestamp":5555}
+            var element2 = {"deviceID":"efgh","user":"nina","reminderTime":"something","timestamp":5678}
+            db.size().should.be.equal(2)
             db.read(element1).should.be.deep.equal(element1)
+            db.read(element2).should.be.deep.equal(element2)
         })
     })
     afterEach(function(){
@@ -197,14 +275,14 @@ describe('Utility specific tests', function(){
     var util
     var data1, data2, data3, data4, data5, data6
     before(function(){
-        util = require('../util.js')
+        util = require('../utils/util.js')
         data1 = null
         data2 = {}
         data3 = {"user":"a", "data":"a","timestamp":1} 
         data4 = {"deviceID":"a", "data":"a","timestamp":1} 
         data5 = {"user":"a", "deviceID":"a","timestamp":1} 
         data6 = {"user":"a", "deviceID":"a","data":"a"} 
-        data = {
+        validdata = {
             "deviceID":"iPad-4603488219",
             "user":"angie@cpp.edu",
             "reminderTime":"something",
@@ -212,8 +290,11 @@ describe('Utility specific tests', function(){
     })
     beforeEach(function(){
     });
-    describe('1 Validate client data from invalid inputs', function(){    
-        it('should be false', function(){
+    describe('Validate client data', function(){    
+        it('should be true on valid input data', function(){         
+            util.validateClientData(validdata).should.be.equal(true)
+        });
+        it('should be false on invalid input data', function(){
             util.validateClientData(data1).should.be.equal(false)
             util.validateClientData(data2).should.be.equal(false)
             util.validateClientData(data3).should.be.equal(false)
@@ -222,25 +303,20 @@ describe('Utility specific tests', function(){
             util.validateClientData(data6).should.be.equal(false)
         });
     });
-    describe('2 Validate client data from valid inputs', function(){    
-        it('should be true', function(){         
-            util.validateClientData(data).should.be.equal(true)
+    describe('Get ID from input data', function(){    
+        it('should be user_dataType on valid data', function(){
+            var validId = validdata.user + '_reminderTime'
+            util.getId(validdata).should.be.equal(validId)        
+            util.getId(validdata).should.be.equal('angie@cpp.edu_reminderTime')
         });
-    });
-    describe('3 Get ID from invalid data', function(){    
-        it('should be null', function(){         
+        it('should be null on invalid data', function(){         
             should.not.exist(util.getId(data1))
             should.not.exist(util.getId(data2))
             should.not.exist(util.getId(data3))
             should.not.exist(util.getId(data4))
             should.not.exist(util.getId(data5))
             should.not.exist(util.getId(data6))
-        });
-    });
-    describe('4 Get ID from valid data', function(){    
-        it('should be user_dataType', function(){         
-            util.getId(data).should.be.equal('angie@cpp.edu_reminderTime')
-        });
+        });  
     });
     afterEach(function(){
     });
