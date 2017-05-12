@@ -42,38 +42,39 @@ app.get('/', function(req, res){
 io.sockets.on('connection', function(socket){
     console.log('New connection: ' + socket.id)
 
-    socket.on('send message', function(data){
-        console.log('server got ' + data)
-        socket.emit('new message', data)
-    })
-
-    // // Loop back test only, sends data to all clients
-    // socket.on('send message', function(dataStr){
-    //     if(dataStr == null){
-    //         statusMsgToClient(1, 'No data received on server.');
-    //         console.log('error: null string from client ' + dataStr)
-    //         return;
-    //     }
-    //     // if(typeof dataStr === 'string'){
-    //     //     dataObj = JSON.parse(dataStr)
-    //     // } 
-    //     console.log('the type is: '+typeof dataStr)
-    //     console.log(JSON.parse(dataStr))
-
-    //     // Sync with database
-    //     if(db.contains(dataObj)){
-    //         db.update(dataObj)
-    //     }
-    //     else{
-    //         db.create(dataObj)
-    //     }
-    //     dataObj.synced = true
-
-    //     // Send to original client
-    //     io.sockets.connected[socket.id].emit('new message', JSON.stringify(dataObj))
-    //     // Send to all other client devices (FIX LATER)
-    //     socket.broadcast.emit('new message', JSON.stringify(dataObj));
+    // socket.on('send message', function(data){
+    //     console.log('server got ' + data)
+    //     socket.emit('new message', data)
     // })
+
+    // Loop back test only, sends data to all clients
+    socket.on('send message', function(dataStr){
+        if(dataStr == null){
+            statusMsgToClient(1, 'No data received on server.');
+            console.log('error: null string from client ' + dataStr)
+            return;
+        }
+
+        console.log('the type is: '+typeof dataStr)
+        if(typeof dataStr === 'string'){
+            dataObj = JSON.parse(dataStr)
+            console.log('Parsed string to Object: ' + JSON.parse(dataStr))
+        } 
+        
+        // Sync with database
+        dataObj.synced = true
+        if(db.contains(dataObj)){
+            db.update(dataObj)
+        }
+        else{
+            db.create(dataObj)
+        }
+
+        // Send to original client
+        io.sockets.connected[socket.id].emit('new message', JSON.stringify(dataObj))
+        // Send to all other client devices (FIX LATER)
+        socket.broadcast.emit('new message', JSON.stringify(dataObj));
+    })
 
     socket.on('request update', function(clientData){
         // console.log(clientData.user + ' requests update on ' + socket.id);
