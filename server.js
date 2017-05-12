@@ -58,8 +58,11 @@ io.sockets.on('connection', function(socket){
         console.log('the type is: '+typeof dataStr)
         if(typeof dataStr === 'string'){
             //dataObj = JSON.parse(dataStr)
-            console.log('Parsed string to Object: ' + JSON.parse(dataStr))
+            console.log('Parsed string to Object: ' + dataStr)
         } 
+        else if(typeof dataStr === 'object'){
+            console.log('Parsed string to Object: ' + JSON.stringify(dataStr))
+        }
         
         // Sync with database
         // dataObj.synced = true
