@@ -57,23 +57,23 @@ io.sockets.on('connection', function(socket){
 
         console.log('the type is: '+typeof dataStr)
         if(typeof dataStr === 'string'){
-            dataObj = JSON.parse(dataStr)
+            //dataObj = JSON.parse(dataStr)
             console.log('Parsed string to Object: ' + JSON.parse(dataStr))
         } 
         
         // Sync with database
-        dataObj.synced = true
-        if(db.contains(dataObj)){
-            db.update(dataObj)
-        }
-        else{
-            db.create(dataObj)
-        }
+        // dataObj.synced = true
+        // if(db.contains(dataObj)){
+        //     db.update(dataObj)
+        // }
+        // else{
+        //     db.create(dataObj)
+        // }
 
         // Send to original client
-        io.sockets.connected[socket.id].emit('new message', JSON.stringify(dataObj))
+        io.sockets.connected[socket.id].emit('new message', JSON.stringify(dataStr))
         // Send to all other client devices (FIX LATER)
-        socket.broadcast.emit('new message', JSON.stringify(dataObj));
+        socket.broadcast.emit('new message', JSON.stringify(dataStr));
     })
 
     socket.on('request update', function(clientData){
