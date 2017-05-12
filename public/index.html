@@ -1,63 +1,76 @@
-<html>
-    <head>
-        <title>Chai Client</title>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <link rel="icon" href="images/chai_logo.png">
 
-        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>Chaisync</title>
 
-        <!-- css files -->
-        <link rel="stylesheet" type="text/css" href="css/indexStyle.css" media="screen" />
+    <!-- Include socket.io for client -->
+    <script src="/socket.io/socket.io.js"></script>
 
-        <!-- Include socket.io for client -->
-        <script src="/socket.io/socket.io.js"></script>
+    <!-- Include AngularJS CDN -->
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.7/angular.min.js"></script>
 
-        <!-- Include AngularJS CDN -->
-        <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.7/angular.min.js"></script>
+    <!-- Include jquery -->
+    <script src="https://code.jquery.com/jquery-3.1.1.slim.min.js" integrity="sha384-A7FZj7v+d/sdmMqp/nOQwliLvUsJfDHW+k9Omg/a/EheAdgtzNs3hpfag6Ed950n" crossorigin="anonymous"></script>
 
-        <!-- Include jquery -->
-        <script src="https://code.jquery.com/jquery-3.1.1.slim.min.js" integrity="sha384-A7FZj7v+d/sdmMqp/nOQwliLvUsJfDHW+k9Omg/a/EheAdgtzNs3hpfag6Ed950n" crossorigin="anonymous"></script>
+    <!-- Include Bootstrap -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
 
-        <!-- Include bootstrap -->
-        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/css/bootstrap.min.css" integrity="sha384-rwoIResjU2yc3z8GV/NPeZWAv56rSmLldC3R/AZzGRnGxQQKnKkoFVhFQhNUwEyJ" crossorigin="anonymous">
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/tether/1.4.0/js/tether.min.js" integrity="sha384-DztdAPBWPRXSA/3eYEEUWrWCy7G5KFbe8fFjk5JAIxUYHKkDx6Qin1DkWx51bBrb" crossorigin="anonymous"></script>
-        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/js/bootstrap.min.js" integrity="sha384-vBWWzlZJ8ea9aCX4pEW3rVHjgjt7zpkNpZk+02D9phzyeVkE+jo0ieGizqPLForn" crossorigin="anonymous"></script>
+    <!-- Custom styles for this template -->
+    <link href="css/serverStyle.css" rel="stylesheet">
 
-        <!-- custom js files -->
-        <script type="text/javascript" src="js/controllers/IndexCtrl.js"></script>
-        <script type="text/javascript" src="js/app.js"></script>
+    <!-- Custom js files -->
+    <script type="text/javascript" src="js/controllers/serverCtrl.js"></script>
 
+</head>
 
-    </head>
+<body ng-app="myApp" ng-controller="serverController">
 
-    <body ng-app="myApp" ng-controller="indexController">
-        <div class="mt-5 container">
-            <div class="row">
+<div class="container">
 
-                <div class="col-lg-5" id="apps">
-
-                    <div id="app1">
-                        <form id='send-message'>
-                            Data1:<input type="text" class="form-control" id='firstname' ng-model="firstname"></input><br>
-                            Data2:<input type="text" class="form-control" id='lastname' ng-model="lastname"></input><br>
-                            
-                            <button type="button" class="btn btn-secondary" ng-click="submit()">Submit</button>
-                            <button type="button" id="ofbt" class="btn btn-danger" ng-click="toggleOF()">Offline</button>
-                        </form>
-                    </div>
-
-                </div>
-
-                <div class="col-lg-2"></div>
-
-                <div class="col-lg-5" id="msgdiv">
-                    <h2>Message: {{user.firstname}} {{user.lastname}}</h2><br>
-                    <code>JSON preview: { firstname: "{{firstname}}", lastname: "{{lastname}}" }</code><br><br>
-                    <p>Output Log: </p>
-
-                    <div id="outputLog"></div>
-                </div>
+    <nav class="navbar navbar-default">
+        <div class="container-fluid">
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <a class="navbar-brand" href="#">Chaisync</a>
+            </div>
+            <div id="navbar" class="navbar-collapse collapse">
+                <ul class="nav navbar-nav">
+                    <li class="active"><a href="#">Home</a></li>
+                    <li><a href="client.html" target="_blank">Client</a></li>
+                </ul>
 
             </div>
         </div>
+    </nav>
 
-    </body>
+    <!-- Main component for a primary marketing message or call to action -->
+    <div class="jumbotron">
+        <h2>Server Database</h2>
+        <div id="jsonDisplay"></div>
+        <br>
+
+        <a class="btn btn-lg btn-primary" href="db.json" target="_blank" role="button">View page</a>
+        <a class="btn btn-lg btn-primary" role="button" onclick="window.location.reload()">Refresh</a>
+        </div>
+    </div>
+
+</div>
+
+
+</body>
 </html>
