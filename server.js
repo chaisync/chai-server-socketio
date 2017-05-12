@@ -33,7 +33,9 @@ var conn = new connList();
 // Route all incoming http 
 app.get('/', function(req, res){
     var path = __dirname + '/public/index.html';
+    res.setHeader("Content-Type", "application/json");
     res.sendFile(path);
+    res.end(json)
 })
 
 // Serve all client websocket messages 
@@ -49,7 +51,7 @@ io.sockets.on('connection', function(socket){
         } 
         console.log('the type is: '+typeof dataStr)
         console.log(JSON.parse(dataStr))
-        
+
         // Sync with database
         if(db.contains(dataObj)){
             db.update(dataObj)
