@@ -44,6 +44,7 @@ io.sockets.on('connection', function(socket){
     socket.on('send message', function(dataStr){
         if(dataStr == null){
             statusMsgToClient(1, 'No data received on server.');
+            console.log('error: null string from client ' + dataStr)
             return;
         }
         if(typeof dataStr === 'string'){
