@@ -72,7 +72,7 @@ io.sockets.on('connection', function(socket){
         // Send to original client
         io.sockets.connected[socket.id].emit('new message', dataObj)
         // Send to all other client devices (FIX LATER)
-        socket.broadcast.emit('new message', JSON.stringify(dataObj));  
+        socket.broadcast.emit('new message', dataObj);  
     })
 
     socket.on('request update', function(clientData){
