@@ -33,62 +33,53 @@ var conn = new connList();
 // Route all incoming http 
 app.get('/', function(req, res){
     var path = __dirname + '/public/index.html';
-    res.setHeader("Content-Type", "application/json");
+    //res.setHeader("Content-Type", "application/json");
     res.sendFile(path);
-    res.end(json)
+    //res.end(json)
 })
 
 // Serve all client websocket messages 
 io.sockets.on('connection', function(socket){
     console.log('New connection: ' + socket.id)
 
-    // socket.on('send message', function(data){
-    //     console.log('server got ' + data)
-    //     socket.emit('new message', data)
-    // })
+    socket.on('send message', function(data){
+        console.log('server got ' + JSON.stringify(data))
+        console.log('...looped back.')
+        io.sockets.connected[socket.id].emit('new message', data)
+    })
 
     // Loop back test only, sends data to all clients
-    socket.on('send message', function(dataStr){
-        if(dataStr == null){
-            statusMsgToClient(1, 'No data received on server.');
-            console.log('error: null string from client ' + dataStr)
-            return;
-        }
+    // socket.on('send message', function(data){
+    //     if(data == null){
+    //         socket.emit('error', data);
+    //         return;
+    //     }
 
-        // Android app sends Object, website sends String
-        //console.log('the type is: '+typeof dataStr)
-        var dataObj
-        if(typeof dataStr === 'string'){
-            dataObj = JSON.parse(dataStr)
-        } 
-        else if(typeof dataStr === 'object'){
-            dataObj = dataStr    
-        }
+    //     // Android app sends Object, website sends String
+    //     //console.log('the type is: '+typeof dataStr)
+    //     var dataObj = data
+    //     if(typeof data !== 'object'){
+    //         console.log('type of data is not object, instead: ' + typeof data)
+    //         dataObj = JSON.parse(dataStr)
+    //     } 
 
-        //Sync with database
-        dataObj.synced = true
-        dataObj.reminder = "5:30 AM Wake up"
-        console.log('Parsed string to Object: ' + JSON.stringify(dataObj))
-        if(db.contains(dataObj)){
-            db.update(dataObj)
-        }
-        else{
-            db.create(dataObj)
-        }
+    //     //Sync with database
+    //     dataObj.synced = true
+    //     dataObj.reminder = "5 AM Wake up"
+        
+    //     if(db.contains(dataObj)){
+    //         db.update(dataObj)
+    //     }
+    //     else{
+    //         db.create(dataObj)
+    //     }
 
-        if(typeof dataStr === 'string'){
-            // Send to original client
-            io.sockets.connected[socket.id].emit('new message', JSON.stringify(dataObj))
-            // Send to all other client devices (FIX LATER)
-            socket.broadcast.emit('new message', JSON.stringify(dataObj));
-        } 
-        else if(typeof dataStr === 'object'){
-            // Send to original client
-            io.sockets.connected[socket.id].emit('new message', dataObj)
-            // Send to all other client devices (FIX LATER)
-            socket.broadcast.emit('new message', dataObj);   
-        }
-    })
+    //     console.log('Parsed Object to string to send to client: ' + JSON.stringify(dataObj))
+    //     // Send to original client
+    //     io.sockets.connected[socket.id].emit('new message', JSON.stringify(dataObj))
+    //     // Send to all other client devices (FIX LATER)
+    //     socket.broadcast.emit('new message', JSON.stringify(dataObj));  
+    // })
 
     socket.on('request update', function(clientData){
         // console.log(clientData.user + ' requests update on ' + socket.id);
@@ -133,35 +124,8 @@ io.sockets.on('connection', function(socket){
         // }
     })
 
-    // Save to database
-    function saveToDatabase(err, data, callback){
-        if(err){    
-            return console.log(err);
-        }
-
-        console.log("New message received: " + JSON.stringify(data));
-        
-        // Push data to database
-        db.create(data);
-        console.log("Data added to DB");
-        callback(null, ['Data entered to database', data.timestamp]);
-        
-        // Backup database to file
-        fs.writeFile('public/db.json', db.toString(), function(err) {
-            if(err) {
-                return console.log(err);
-            }
-            console.log("Database file updated.");
-        });
-    }
-
-    // Client requested data refresh from database
-    socket.on('get db entry from server', function(timestamp){
-        getDataByTimestamp(timestamp, sendDataToClient)
-    })
-    
     socket.on('disconnect', function(){
-        console.log('disconnect: ' + Object.keys(io.sockets.sockets));
+        console.log('Disconnection : ' + socket.id);
     });
 
     socket.on('loopback test', function(data){
@@ -169,37 +133,7 @@ io.sockets.on('connection', function(socket){
         socket.emit('loopback response', data)
     })
 
-    // Search db by timestamp and return data element to client
-    function getDataByTimestamp(timestamp, callback){
-        console.log('Database entry requested: ' + JSON.stringify(timestamp));
-        var result = db.findByTimestamp(timestamp);
-        callback(null, result);
-               
-        //findIndexByKeyValue(chaidb, 'timestamp', data, sendDataToClient);
-    }
-
-    // Search array for index of given key  
-    function findIndexByKeyValue(obj, key, value, replyToClient){
-        for (var i = 0; i < obj.length; i++) {
-            console.log('key:' + key + ' value:' + obj[i][key]);
-            if (obj[i][key] == value) {
-                return sendDataToClient(null, obj[i]);
-            }
-        }
-        return sendDataToClient(1);
-    }
-
-    // Reply to client with db[i], or empty value if not found
-    function sendDataToClient(err, data){
-        if(err){
-            socket.emit('send data to client', [null]);
-            return;
-        }
-        console.log('Data to client: '+ JSON.stringify(data));
-        socket.emit('send data to client', JSON.stringify(data));
-    }
-
-    // Send status confirmation message to client
+        // Send status confirmation message to client
     function statusMsgToClient(err, message){
         if(err){
             socket.emit('error', message);
@@ -207,17 +141,80 @@ io.sockets.on('connection', function(socket){
         }
         socket.emit('success', message);
     }
-
-    // Backup database to file
-    function backupDatabase(){
-        // Backup database to file
-        fs.writeFile('public/db.json', db.toString(), function(err) {
-            if(err) {s
-                return console.log(err);
-            }
-            console.log("Database file updated.");
-        });
-    }
 })
 
 exports.db = db
+
+
+
+
+    // // Save to database
+    // function saveToDatabase(err, data, callback){
+    //     if(err){    
+    //         return console.log(err);
+    //     }
+
+    //     console.log("New message received: " + JSON.stringify(data));
+        
+    //     // Push data to database
+    //     db.create(data);
+    //     console.log("Data added to DB");
+    //     callback(null, ['Data entered to database', data.timestamp]);
+        
+    //     // Backup database to file
+    //     fs.writeFile('public/db.json', db.toString(), function(err) {
+    //         if(err) {
+    //             return console.log(err);
+    //         }
+    //         console.log("Database file updated.");
+    //     });
+    // }
+
+
+        // // Client requested data refresh from database
+    // socket.on('get db entry from server', function(timestamp){
+    //     getDataByTimestamp(timestamp, sendDataToClient)
+    // })
+
+    // // Search db by timestamp and return data element to client
+    // function getDataByTimestamp(timestamp, callback){
+    //     console.log('Database entry requested: ' + JSON.stringify(timestamp));
+    //     var result = db.findByTimestamp(timestamp);
+    //     callback(null, result);
+               
+    //     //findIndexByKeyValue(chaidb, 'timestamp', data, sendDataToClient);
+    // }
+
+    // // Search array for index of given key  
+    // function findIndexByKeyValue(obj, key, value, replyToClient){
+    //     for (var i = 0; i < obj.length; i++) {
+    //         console.log('key:' + key + ' value:' + obj[i][key]);
+    //         if (obj[i][key] == value) {
+    //             return sendDataToClient(null, obj[i]);
+    //         }
+    //     }
+    //     return sendDataToClient(1);
+    // }
+
+    // // Reply to client with db[i], or empty value if not found
+    // function sendDataToClient(err, data){
+    //     if(err){
+    //         socket.emit('send data to client', [null]);
+    //         return;
+    //     }
+    //     console.log('Data to client: '+ JSON.stringify(data));
+    //     socket.emit('send data to client', JSON.stringify(data));
+    // }
+
+
+
+    // // Backup database to file
+    // function backupDatabase(){
+    //     // Backup database to file
+    //     fs.writeFile('public/db.json', db.toString(), function(err) {
+    //         if(err) {s
+    //             return console.log(err);
+    //         }
+    //         console.log("Database file updated.");
+    //     });
+    // }

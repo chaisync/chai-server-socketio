@@ -4,6 +4,7 @@
     <title>(Test) Chai Client</title>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="icon" href="images/chai_logo.png">
 
     <!-- Include socket.io for client -->
     <script src="/socket.io/socket.io.js"></script>
@@ -305,7 +306,9 @@
 
                 // Attempt sending result to server
                 if($scope.connected == true) {
-                    socket.emit('send message', JSON.stringify(result));
+                    console.log(result)
+                    //socket.emit('send message', JSON.stringify(result));
+                    socket.emit('send message', result); // Send an Object, socket io automatically converts to JSON
                     //socket.emit('request update', result)
                 }
             };
