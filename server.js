@@ -70,7 +70,7 @@ io.sockets.on('connection', function(socket){
 
         console.log('Parsed Object to string to send to client: ' + JSON.stringify(dataObj))
         // Send to original client
-        io.sockets.connected[socket.id].emit('new message', JSON.stringify(dataObj))
+        io.sockets.connected[socket.id].emit('new message', dataObj)
         // Send to all other client devices (FIX LATER)
         socket.broadcast.emit('new message', JSON.stringify(dataObj));  
     })
