@@ -1,1 +1,1 @@
-{"bob_reminderTime":{"deviceID":"abcd","user":"bob","reminderTime":"something","timestamp":1234},"angie@cpp.edu_reminderTime":{"deviceID":"iPad-4603488219","user":"angie@cpp.edu","reminderTime":"d","timestamp":1494704831668,"synced":true,"reminder":"5 AM Wake up"}}
+{"bob_reminderTime":{"deviceID":"abcd","user":"bob","reminderTime":"something","timestamp":1234},"angie@cpp.edu_reminderTime":{"deviceID":"iPad-4603488219","user":"angie@cpp.edu","reminderTime":"asdf","timestamp":1494707972104,"synced":true,"reminder":"!fix a bug here!"}}

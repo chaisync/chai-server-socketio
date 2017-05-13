@@ -42,44 +42,38 @@ app.get('/', function(req, res){
 io.sockets.on('connection', function(socket){
     console.log('New connection: ' + socket.id)
 
-    socket.on('send message', function(data){
-        console.log('server got ' + JSON.stringify(data))
-        console.log('...looped back.')
-        io.sockets.connected[socket.id].emit('new message', data)
-    })
-
     // Loop back test only, sends data to all clients
-    // socket.on('send message', function(data){
-    //     if(data == null){
-    //         socket.emit('error', data);
-    //         return;
-    //     }
+    socket.on('send message', function(data){
+        if(data == null){
+            socket.emit('error', data);
+            return;
+        }
 
-    //     // Android app sends Object, website sends String
-    //     //console.log('the type is: '+typeof dataStr)
-    //     var dataObj = data
-    //     if(typeof data !== 'object'){
-    //         console.log('type of data is not object, instead: ' + typeof data)
-    //         dataObj = JSON.parse(dataStr)
-    //     } 
+        // Android app sends Object, website sends String
+        //console.log('the type is: '+typeof dataStr)
+        var dataObj = data
+        if(typeof data !== 'object'){
+            console.log('type of data is not object, instead: ' + typeof data)
+            dataObj = JSON.parse(dataStr)
+        } 
 
-    //     //Sync with database
-    //     dataObj.synced = true
-    //     dataObj.reminder = "5 AM Wake up"
+        //Sync with database
+        dataObj.synced = true
+        dataObj.reminder = "!fix a bug here!"
         
-    //     if(db.contains(dataObj)){
-    //         db.update(dataObj)
-    //     }
-    //     else{
-    //         db.create(dataObj)
-    //     }
+        if(db.contains(dataObj)){
+            db.update(dataObj)
+        }
+        else{
+            db.create(dataObj)
+        }
 
-    //     console.log('Parsed Object to string to send to client: ' + JSON.stringify(dataObj))
-    //     // Send to original client
-    //     io.sockets.connected[socket.id].emit('new message', JSON.stringify(dataObj))
-    //     // Send to all other client devices (FIX LATER)
-    //     socket.broadcast.emit('new message', JSON.stringify(dataObj));  
-    // })
+        console.log('Parsed Object to string to send to client: ' + JSON.stringify(dataObj))
+        // Send to original client
+        io.sockets.connected[socket.id].emit('new message', JSON.stringify(dataObj))
+        // Send to all other client devices (FIX LATER)
+        socket.broadcast.emit('new message', JSON.stringify(dataObj));  
+    })
 
     socket.on('request update', function(clientData){
         // console.log(clientData.user + ' requests update on ' + socket.id);
@@ -129,8 +123,9 @@ io.sockets.on('connection', function(socket){
     });
 
     socket.on('loopback test', function(data){
-        console.log('server got ' + data)
-        socket.emit('loopback response', data)
+        console.log('server got ' + JSON.stringify(data))
+        console.log('...looped back.')
+        io.sockets.connected[socket.id].emit('new message', data)
     })
 
         // Send status confirmation message to client
