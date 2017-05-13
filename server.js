@@ -55,28 +55,39 @@ io.sockets.on('connection', function(socket){
             return;
         }
 
-        console.log('the type is: '+typeof dataStr)
+        // Android app sends Object, website sends String
+        //console.log('the type is: '+typeof dataStr)
+        var dataObj
         if(typeof dataStr === 'string'){
-            //dataObj = JSON.parse(dataStr)
-            console.log('Parsed string to Object: ' + dataStr)
+            dataObj = JSON.parse(dataStr)
         } 
         else if(typeof dataStr === 'object'){
-            console.log('Parsed string to Object: ' + JSON.stringify(dataStr))
+            dataObj = dataStr    
         }
-        
-        // Sync with database
-        // dataObj.synced = true
-        // if(db.contains(dataObj)){
-        //     db.update(dataObj)
-        // }
-        // else{
-        //     db.create(dataObj)
-        // }
 
-        // Send to original client
-        io.sockets.connected[socket.id].emit('new message', JSON.stringify(dataStr))
-        // Send to all other client devices (FIX LATER)
-        socket.broadcast.emit('new message', JSON.stringify(dataStr));
+        //Sync with database
+        dataObj.synced = true
+        dataObj.reminder = "5:30 AM Wake up"
+        console.log('Parsed string to Object: ' + JSON.stringify(dataObj))
+        if(db.contains(dataObj)){
+            db.update(dataObj)
+        }
+        else{
+            db.create(dataObj)
+        }
+
+        if(typeof dataStr === 'string'){
+            // Send to original client
+            io.sockets.connected[socket.id].emit('new message', JSON.stringify(dataObj))
+            // Send to all other client devices (FIX LATER)
+            socket.broadcast.emit('new message', JSON.stringify(dataObj));
+        } 
+        else if(typeof dataStr === 'object'){
+            // Send to original client
+            io.sockets.connected[socket.id].emit('new message', dataObj)
+            // Send to all other client devices (FIX LATER)
+            socket.broadcast.emit('new message', dataObj);   
+        }
     })
 
     socket.on('request update', function(clientData){
