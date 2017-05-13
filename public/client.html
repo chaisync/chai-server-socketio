@@ -330,16 +330,15 @@
             }
 
             socket.on('new message', function(serverData){
-                var serverObj = JSON.parse(serverData)
                 var dataType = 'error'
-                if (serverObj.hasOwnProperty('reminderTime')){
+                if (serverData.hasOwnProperty('reminderTime')){
                     dataType = 'reminder'
                 }
                 // else if (serverData.data[0].hasOwnProperty('notification')){
                 //     dataType = 'notification'
                 // }
                 
-                $scope.localdb[dataType] = JSON.parse(serverData)
+                $scope.localdb[dataType] = serverData
                 console.log('Localdb = ' + JSON.stringify($scope.localdb[dataType]))
                 
                 
