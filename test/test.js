@@ -8,17 +8,16 @@ describe('Http specific tests', function(){
     });
 });
 
-describe('Socket.io Server specific tests', function(){
+describe.skip('Socket.io Server specific tests', function(){
     var db = require('../server.js').db
     var io = require('socket.io-client')
-    //var socketUrl = 'http://localhost:5000';
+    var socketUrl = 'http://localhost:5000';
     var socketUrl = 'http://localhost:8080';
     var options = {  
-        transports: ['websocket'],
-        'force new connection': true
-    };
+       transports: ['websocket'],
+       'force new connection': true};
     
-    describe.only('socket on loopback test', function(){
+    describe('socket on loopback test', function(){
         it('should respond back same data as original client emit data', function(done){
             var user1 = {'name':'bob@abc.com'}
             client1 = io.connect(socketUrl, options)
@@ -27,7 +26,7 @@ describe('Socket.io Server specific tests', function(){
                 client1.emit('loopback test', user1)
             })
             
-            client1.on('loopback response', function(data){
+            client1.on('new nessage', function(data){
                 data.should.deep.equal(user1)
                 client1.disconnect()
                 done()
@@ -57,7 +56,7 @@ describe('Socket.io Server specific tests', function(){
                 client1.disconnect()
                 done()
             })
-        });
+        })
     });
 });
 
