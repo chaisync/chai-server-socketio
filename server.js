@@ -16,50 +16,36 @@ server.listen(app.get('port'), function(){
 // set the static file location
 app.use(express.static(__dirname + '/public'));
 
-// Database location
-//var fs = require('fs'); //             <-- TODO: move to chaiDB.js module
-
 // Database
-//var chaiDB = require('./chaiDB.js'); //<-- array style db
-//var db = new chaiDB('./chaidb.json');//<-- array style db
 var chaiDictDB = require('./chaiDictDB.js')
 var db = new chaiDictDB('./public/db.json')
 db.loadFromFile()
 
-// Connection list
-var connList = require('./utils/connDict.js');
-var conn = new connList();
+// Include helper files
+var util = require('./utils/util.js')
+var connDict = require('./utils/connDict.js');
+var conn = new connDict();
 
 // Route all incoming http 
 app.get('/', function(req, res){
     var path = __dirname + '/public/index.html';
-    //res.setHeader("Content-Type", "application/json");
     res.sendFile(path);
-    //res.end(json)
 })
 
 // Serve all client websocket messages 
 io.sockets.on('connection', function(socket){
-    console.log('New connection: ' + socket.id)
+    //console.log('New connection: ' + socket.id)
 
-    // Loop back test only, sends data to all clients
     socket.on('send message', function(data){
-        if(data == null){
-            socket.emit('error', data);
+        if(util.validateClientData(data) == false){  
+            socket.emit('exception', 'Server received invalid data from client');
             return;
         }
-
-        // Android app sends Object, website sends String
-        //console.log('the type is: '+typeof dataStr)
+        
+        // Sync with database
         var dataObj = data
-        if(typeof data !== 'object'){
-            console.log('type of data is not object, instead: ' + typeof data)
-            dataObj = JSON.parse(dataStr)
-        } 
-
-        //Sync with database
         dataObj.synced = true
-        dataObj.reminder = "!fix a bug here!"
+        dataObj.reminder = "!fix a bug here!" // Android apps have a bug, delete this line after fix
         
         if(db.contains(dataObj)){
             db.update(dataObj)
@@ -76,50 +62,49 @@ io.sockets.on('connection', function(socket){
     })
 
     socket.on('request update', function(clientData){
-        // console.log(clientData.user + ' requests update on ' + socket.id);
-        
-        // if(clientData == null){
-        //     statusMsgToClient(1, 'No data received on server.');
-        //     return;
-        // }
-        
-        // latestData(clientData, function(){
-        //     // Emit update to original client
-        //     io.sockets.connected[socket.id].emit('send update', latestData)   
-        //     conn.set(latestData.user, latestData.deviceID, socket.id)
-        //     console.log('Connections: ' + JSON.stringify(conn.get()))
-        //     // TODO: broadcast to all user-devices
-        // })
+        if(util.validateClientData(clientData) == false){  
+            socket.emit('exception', 'Server received invalid data from client');
+            return;
+        }
 
-        // var latestData = function(clientData, callback){
-        //     // Compare device data with server data
-        //     if(db.contains(clientData)){
-        //         var serverVersion = db.read(clientData)
-                
-        //         // If server behind 
-        //         if (serverVersion.timestamp < clientData.timestamp){
-        //             clientData.synced = true
-        //             db.update(clientData)
-        //             callback()
-        //             return clientData
-        //         }
-        //         else{  // Client behind
-        //             serverVersion.synced = true
-        //             db.update(serverVersion)
-        //             callback()
-        //             return serverVersion
-        //         }  
-        //     }
-        //     else{
-        //         clientData.synced = true
-        //         callback()
-        //         return clientData
-        //     }
-        // }
+        // Add this connection to list of connections
+        conn.addConnection(socket.id, clientData.user, clientData.deviceID)
+
+        // Get server version of data
+        if(db.contains(clientData) == false){
+            db.create(clientData)            
+        }
+        var serverData = db.read(clientData)
+        serverData.synced = false
+
+        // Find out who is ahead and save their data 
+        if (serverData.timestamp < clientData.timestamp){
+            clientData.synced = true
+            clientData.reminder = "!fix a bug here!" // Android apps have a bug, delete this line after fix
+            db.update(clientData)
+        }
+        else{
+            serverData.synced = true
+            serverData.reminder = "!fix a bug here!" // Android apps have a bug, delete this line after fix
+            db.update(serverData)
+        }        
+
+        // Send latest sync to client devices
+        serverData = db.read(serverData)
+        //console.log('Synced data to send back to client: ' + JSON.stringify(serverData))
+        
+        var connAry = conn.findAllUserConnections(serverData.user)
+        for(var i=0; i<connAry.length; i++){
+            io.sockets.connected[connAry[i]].emit('new message', serverData) 
+        }
+         
     })
 
     socket.on('disconnect', function(){
-        console.log('Disconnection : ' + socket.id);
+        //console.log('Disconnection : ' + socket.id);
+
+        // Delete this connection to list of connections
+        conn.deleteConnection(socket.id)
     });
 
     socket.on('loopback test', function(data){
@@ -127,89 +112,6 @@ io.sockets.on('connection', function(socket){
         console.log('...looped back.')
         io.sockets.connected[socket.id].emit('new message', data)
     })
-
-        // Send status confirmation message to client
-    function statusMsgToClient(err, message){
-        if(err){
-            socket.emit('error', message);
-            return;
-        }
-        socket.emit('success', message);
-    }
 })
 
 exports.db = db
-
-
-
-
-    // // Save to database
-    // function saveToDatabase(err, data, callback){
-    //     if(err){    
-    //         return console.log(err);
-    //     }
-
-    //     console.log("New message received: " + JSON.stringify(data));
-        
-    //     // Push data to database
-    //     db.create(data);
-    //     console.log("Data added to DB");
-    //     callback(null, ['Data entered to database', data.timestamp]);
-        
-    //     // Backup database to file
-    //     fs.writeFile('public/db.json', db.toString(), function(err) {
-    //         if(err) {
-    //             return console.log(err);
-    //         }
-    //         console.log("Database file updated.");
-    //     });
-    // }
-
-
-        // // Client requested data refresh from database
-    // socket.on('get db entry from server', function(timestamp){
-    //     getDataByTimestamp(timestamp, sendDataToClient)
-    // })
-
-    // // Search db by timestamp and return data element to client
-    // function getDataByTimestamp(timestamp, callback){
-    //     console.log('Database entry requested: ' + JSON.stringify(timestamp));
-    //     var result = db.findByTimestamp(timestamp);
-    //     callback(null, result);
-               
-    //     //findIndexByKeyValue(chaidb, 'timestamp', data, sendDataToClient);
-    // }
-
-    // // Search array for index of given key  
-    // function findIndexByKeyValue(obj, key, value, replyToClient){
-    //     for (var i = 0; i < obj.length; i++) {
-    //         console.log('key:' + key + ' value:' + obj[i][key]);
-    //         if (obj[i][key] == value) {
-    //             return sendDataToClient(null, obj[i]);
-    //         }
-    //     }
-    //     return sendDataToClient(1);
-    // }
-
-    // // Reply to client with db[i], or empty value if not found
-    // function sendDataToClient(err, data){
-    //     if(err){
-    //         socket.emit('send data to client', [null]);
-    //         return;
-    //     }
-    //     console.log('Data to client: '+ JSON.stringify(data));
-    //     socket.emit('send data to client', JSON.stringify(data));
-    // }
-
-
-
-    // // Backup database to file
-    // function backupDatabase(){
-    //     // Backup database to file
-    //     fs.writeFile('public/db.json', db.toString(), function(err) {
-    //         if(err) {s
-    //             return console.log(err);
-    //         }
-    //         console.log("Database file updated.");
-    //     });
-    // }

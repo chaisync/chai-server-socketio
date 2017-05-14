@@ -1,4 +1,4 @@
-util = require('./utils/util.js')
+var util = require('./utils/util.js')
 var fs = require('fs');
 var fileName
 

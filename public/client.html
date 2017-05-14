@@ -306,10 +306,8 @@
 
                 // Attempt sending result to server
                 if($scope.connected == true) {
-                    console.log(result)
-                    //socket.emit('send message', JSON.stringify(result));
-                    socket.emit('send message', result); // Send an Object, socket io automatically converts to JSON
-                    //socket.emit('request update', result)
+                    //socket.emit('send message', result);
+                    socket.emit('request update', result)
                 }
             };
 
@@ -341,7 +339,6 @@
                 $scope.localdb[dataType] = serverData
                 console.log('Localdb = ' + JSON.stringify($scope.localdb[dataType]))
                 
-                
                 $scope.$apply()
                 setTimeout(function(){
                     if (true){
@@ -366,21 +363,10 @@
                     }
                 }, 1000)
             })
-
-            socket.on('success', function(data){
-                console.log('success: ' + data[0] + ' ' + data[1]);
-                // Update local from db
-                //socket.emit('get db entry from server', data[1]); 
-                setTimeout(function(){
-                    if (true){
-                        updateOutputSyncColors()
-                    }
-                }, 500)
-                
-            });
             
-            socket.on('error', function(data){
-                console.log('error: ' + data);
+            // Error message from server
+            socket.on('exception', function(data){
+                console.log(data);
             })
 
             // Build a data object 

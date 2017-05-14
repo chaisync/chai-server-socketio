@@ -3,6 +3,9 @@ var validateClientData = function(data){
     if(data == null){
         return false
     }
+    if(typeof data !== 'object'){
+        return false
+    } 
     if(JSON.stringify(data) === JSON.stringify({})){
         return false
     }
