@@ -1,11 +1,25 @@
 var app = angular.module('myApp', []);
 
 app.controller("serverController", function() {
+    //get the db.json content as a object
     $.ajax({ url: "db.json", success: function(file_content) {
+
+        //parse the json object to string
         var content = JSON.stringify(file_content);
-        console.log(content);
+
+        //if first and last characters are { or }, delete them
+        if (content.charAt(0) === '{') {
+            content = content.substr(1)
+        }
+        var strLength = content.length;
+        if (content.charAt(strLength - 1) == "}") {
+            content = content.slice(0,-1);
+        }
+
+        //split the string by '},' into an array
         var contentSplit = content.split(['},']);
-        console.log(contentSplit);
+
+        //append each element of the array to the html as a piece of data from the database
         var node = document.getElementById('jsonDisplay');
         for (var i = 0; i < contentSplit.length; i++) {
             var newNode = document.createElement('code');
