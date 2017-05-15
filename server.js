@@ -101,16 +101,19 @@ io.sockets.on('connection', function(socket){
     })
 
     socket.on('disconnect', function(){
-        //console.log('Disconnection : ' + socket.id);
-
-        // Delete this connection to list of connections
         conn.deleteConnection(socket.id)
+        console.log('Disconnection : ' + socket.id);
     });
 
     socket.on('loopback test', function(data){
         console.log('server got ' + JSON.stringify(data))
         console.log('...looped back.')
         io.sockets.connected[socket.id].emit('new message', data)
+    })
+
+    socket.on('announce', function(clientIdent){
+        conn.addConnection(socket.id, clientIdent.user, clientIdent.deviceID)
+        console.log('announce: ' + JSON.stringify(clientIdent) + ' on ' + socket.id)
     })
 })
 

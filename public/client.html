@@ -122,8 +122,8 @@
 
             <ul class="nav nav-tabs">
                 <li class="active"><a id="noAppTab" data-toggle="tab" href="#noapp">No App</a></li>
-                <li><a id="app1Tab" data-toggle="tab" href="#app1">App 1</a></li>
-                <li><a id="app2Tab" data-toggle="tab" href="#app2">App 2</a></li>
+                <li><a id="app1Tab" data-toggle="tab" href="#app1">App A</a></li>
+                <li><a id="app2Tab" data-toggle="tab" href="#app2">App B</a></li>
             </ul>
 
             <div class="tab-content">
@@ -239,15 +239,16 @@
             // Control the behavior of the connection toggle button
             $scope.toggleConnection = function(){
                 $scope.connected = !$scope.connected
-                if ($scope.connected == false){
-                    document.getElementById("connectIcon").className = "glyphicon glyphicon-ban-circle";
-                    document.getElementById("connectButton").className = "btn btn-danger btn-block";
-                    document.getElementById("connectButton").firstChild.data = "Off";                  
-                    return;
+                document.getElementById("connectIcon").className = ($scope.connected) ? "glyphicon glyphicon-signal" : "glyphicon glyphicon-ban-circle";
+                document.getElementById("connectButton").className = ($scope.connected) ? "btn btn-primary btn-block" : "btn btn-danger btn-block";
+                document.getElementById("connectButton").firstChild.data = ($scope.connected) ? "" : "Off";    
+
+                if ($scope.connected){
+                    socket.connect()
                 }
-                document.getElementById("connectIcon").className = "glyphicon glyphicon-signal";
-                document.getElementById("connectButton").className = "btn btn-primary btn-block";
-                document.getElementById("connectButton").firstChild.data = "";    
+                else{
+                    socket.close()
+                }
             }
 
             // Select user dropdown tracks user selection and also updates the device list
@@ -367,6 +368,13 @@
             // Error message from server
             socket.on('exception', function(data){
                 console.log(data);
+            })
+
+            // Connection event, announce client identity to server
+            socket.on('connect', function(){
+                var ident = {"user": $scope.selectedUser.user, "deviceID":$scope.selectedDevice}
+                socket.emit('announce', ident)
+                console.log('Socket id: ' + socket.id)
             })
 
             // Build a data object 
