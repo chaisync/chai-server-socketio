@@ -1,64 +1,8 @@
-// Use Chai-should style assertions
+// // Use Chai-should style assertions
 var chai = require('chai');
+var chaiHttp = require('chai-http')
 var should = chai.should();
-
-describe('Http specific tests', function(){
-    describe('#test1', function(){
-        it('should test something http');
-    });
-});
-
-describe.skip('Socket.io Server specific tests', function(){
-    var db = require('../server.js').db
-    var io = require('socket.io-client')
-    var socketUrl = 'http://localhost:5000';
-    var socketUrl = 'http://localhost:8080';
-    var options = {  
-       transports: ['websocket'],
-       'force new connection': true};
-    
-    describe('socket on loopback test', function(){
-        it('should respond back same data as original client emit data', function(done){
-            var user1 = {'name':'bob@abc.com'}
-            client1 = io.connect(socketUrl, options)
-
-            client1.on('connect', function(data){
-                client1.emit('loopback test', user1)
-            })
-            
-            client1.on('new nessage', function(data){
-                data.should.deep.equal(user1)
-                client1.disconnect()
-                done()
-            })
-        });
-    });
-    describe('socket on send message', function(){
-        it('should respond back data with {synced:true}', function(done){
-            var origData1 = {
-                "deviceID":"abcd",
-                "user":"bob",
-                "reminderTime":"something",
-                "timestamp":1234}
-            var syncedData1 = JSON.parse(JSON.stringify(origData1))
-            
-            syncedData1['synced'] = true
-            
-            client1 = io.connect(socketUrl, options)
-
-            client1.on('connect', function(data){
-                client1.emit('send message', JSON.stringify(origData1))
-            })
-            
-            client1.on('new message', function(data){
-                JSON.parse(data).should.deep.equal(syncedData1)
-                //console.log(db.read(origData1))
-                client1.disconnect()
-                done()
-            })
-        })
-    });
-});
+chai.use(chaiHttp)
 
 describe('Connection Dictionary specific tests', function(){
     var connDict = require('../utils/connDict.js')
@@ -79,19 +23,19 @@ describe('Connection Dictionary specific tests', function(){
         connection3 = 'c3333333'
         connection4 = 'd4444444'
     })
-    describe('1 Empty dictionary', function(){
+    describe('Empty dictionary', function(){
         it('should have size 0', function(){
             conn.size().should.be.equal(0)
         });
     });
-    describe('2 Add an initial connection', function(){
+    describe('Add an initial connection', function(){
         it('should return length 1', function(){
             var count = conn.size()
             conn.addConnection(user1, user1device1, connection1)
             conn.size().should.be.equal(count+1)
         });
     });
-    describe('3 Delete sole connection', function(){
+    describe('Delete sole connection', function(){
         it('should return true and length 0', function(){
             conn.deleteConnection(user1).should.be.equal(true)
             conn.size().should.be.equal(0)
@@ -99,14 +43,14 @@ describe('Connection Dictionary specific tests', function(){
             conn.deleteConnection(user2).should.be.equal(false)
         });
     });
-    describe('4 Delete connections not in dictionary', function(){
+    describe('Delete connections not in dictionary', function(){
         it('should return false', function(){
             conn.size().should.be.equal(0)
             conn.deleteConnection(user1).should.be.equal(false)
             conn.deleteConnection(user2).should.be.equal(false)
         });
     });
-    describe('5 Find All User Connections', function(){
+    describe('Find All User Connections', function(){
         it('should return array of connections', function(){
             conn.addConnection(connection1, user1, user1device1)
             conn.addConnection(connection2, user1, user1device2)
@@ -323,40 +267,92 @@ describe('Utility specific tests', function(){
     });
 });
 
-// Describe structure of test suite
-// describe('Database tests', function(){
-//     var chaiDB = require('../chaiDB.js');
-//     var db = new chaiDB('../public/testdb.json');
-//     var foo;
-//     var chunks;
-//     var foo;
-//     before(function(){
-//         foo = 'peanut';
-//     });
-//     beforeEach(function(){   
-//     });
-//     describe('#test1', function(){
-//         it('should be length 8', function(){
-//             // Add test data to database
-//             var chunk1 = {deviceID: "Android Tab", user: "angie@cpp.edu", reminderTime: "5:00pm",timestamp: 1};
-//             var chunk2 = {deviceID: "Android Phone", user: "angie@cpp.edu", reminderTime: "2:00pm",timestamp: 1};
-//             var chunk3 = {deviceID: "Apple iPhone", user: "angie@cpp.edu", reminderTime: "1:30pm",timestamp: 5};
-//             var chunk4 = {deviceID: "Apple iPad", user: "angie@cpp.edu", reminderTime: "8:00pm",timestamp: 10};
-//             var chunk5 = {deviceID: "Android Tab", user: "bryan@cpp.edu", reminderTime: "4:00pm",timestamp: 2};
-//             var chunk6 = {deviceID: "Android Phone", user: "bryan@cpp.edu", reminderTime: "12:01pm",timestamp: 2};
-//             var chunk7 = {deviceID: "Apple iPhone", user: "bryan@cpp.edu", reminderTime: "6:01pm",timestamp: 2};
-//             var chunk8 = {deviceID: "Apple iPad", user: "bryan@cpp.edu", reminderTime: "6:01pm",timestamp: 2};
-//             var chunks = [chunk1,chunk2,chunk3,chunk4,chunk5,chunk6,chunk7,chunk8];
-//             chunks.forEach(function(entry){
-//                 db.create(entry);
-//             })
+describe('Http specific tests', function(){
+    var app;
+    beforeEach(function(done){
+        var server = require('./testserver.js', {bustCache: true})
+        app = server.makeServer()
+        done()
+    })
+    afterEach(function(done){
+        app.close(done)
+    })
+    describe('Index html', function(){  
+        it('should return status 200', function(done){
+            chai.request(app)
+            .get('/')
+            .end(function(err, res){
+                res.should.have.status(200)
+                done()
+            })
+        });
+        it('should have an empty body', function(done){
+            chai.request(app)
+            .get('/')
+            .end(function(err, res){
+                res.body.should.be.deep.equal({})
+                done()
+            })
+        });
+        it('should 404 everything else', function(done){
+            chai.request(app)
+            .get('/foo')
+            .end(function(err, res){
+                res.should.have.status(404)
+                done()
+            })
+        })
+    });
+});
 
-//             chunks.length.should.be.equal(8);
-//         })
-//     });
-//     describe('#test2', function(){
-//         it('should be a string', function(){
-//             foo.should.be.a.string;
+// describe.skip('Socket.io Server specific tests', function(){
+//     var db = require('../server.js').db
+//     var io = require('socket.io-client')
+//     var socketUrl = 'http://localhost:5000';
+//     var socketUrl = 'http://localhost:8080';
+//     var options = {  
+//        transports: ['websocket'],
+//        'force new connection': true};
+    
+//     describe('socket on loopback test', function(){
+//         it('should respond back same data as original client emit data', function(done){
+//             var user1 = {'name':'bob@abc.com'}
+//             client1 = io.connect(socketUrl, options)
+
+//             client1.on('connect', function(data){
+//                 client1.emit('loopback test', user1)
+//             })
+            
+//             client1.on('new nessage', function(data){
+//                 data.should.deep.equal(user1)
+//                 client1.disconnect()
+//                 done()
+//             })
 //         });
+//     });
+//     describe('socket on send message', function(){
+//         it('should respond back data with {synced:true}', function(done){
+//             var origData1 = {
+//                 "deviceID":"abcd",
+//                 "user":"bob",
+//                 "reminderTime":"something",
+//                 "timestamp":1234}
+//             var syncedData1 = JSON.parse(JSON.stringify(origData1))
+            
+//             syncedData1['synced'] = true
+            
+//             client1 = io.connect(socketUrl, options)
+
+//             client1.on('connect', function(data){
+//                 client1.emit('send message', JSON.stringify(origData1))
+//             })
+            
+//             client1.on('new message', function(data){
+//                 JSON.parse(data).should.deep.equal(syncedData1)
+//                 //console.log(db.read(origData1))
+//                 client1.disconnect()
+//                 done()
+//             })
+//         })
 //     });
 // });
