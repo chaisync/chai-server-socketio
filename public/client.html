@@ -373,7 +373,7 @@
             // Connection event, announce client identity to server
             socket.on('connect', function(){
                 var ident = {"user": $scope.selectedUser.user, "deviceID":$scope.selectedDevice}
-                socket.emit('announce', ident)
+                //socket.emit('announce', ident)
                 console.log('Socket id: ' + socket.id)
             })
 
