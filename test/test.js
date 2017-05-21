@@ -1,4 +1,4 @@
-// // Use Chai-should style assertions
+// Use Chai-should style assertions
 var chai = require('chai');
 var chaiHttp = require('chai-http')
 var should = chai.should();
@@ -77,7 +77,7 @@ describe('ChaiDictDB specific tests', function(){
     before(function(){
         mainFile = './test/test_doNotModify.json'
         testFile = './test/test.json'
-        chaiDB = require('../chaiDictDB.js')
+        chaiDB = require('../utils/chaiDictDB.js')
         util = require('../utils/util.js')
     })
     beforeEach(function(){
@@ -270,17 +270,23 @@ describe('Utility specific tests', function(){
 describe('Http specific tests', function(){
     var app;
     beforeEach(function(done){
-        var server = require('./testserver.js', {bustCache: true})
-        app = server.makeServer()
+        delete require.cache[require.resolve('../server')]; // Needed to start new server before each test
+        process.stdout.write("        ");
+        app = require('../server.js').app
+        server = require('../server.js').server
+        this.timeout(5000)  // Give server 5 sec to start-up (default 2 is not enough sometimes)
         done()
     })
     afterEach(function(done){
-        app.close(done)
+        server.close(function(){
+            console.log('        Server closed on port ' + app.get('port'))
+            done()
+        })
     })
-    describe('Index html', function(){  
+    describe('Ping server', function(){  
         it('should return status 200', function(done){
             chai.request(app)
-            .get('/')
+            .get('/ping')
             .end(function(err, res){
                 res.should.have.status(200)
                 done()
@@ -288,7 +294,7 @@ describe('Http specific tests', function(){
         });
         it('should have an empty body', function(done){
             chai.request(app)
-            .get('/')
+            .get('/ping')
             .end(function(err, res){
                 res.body.should.be.deep.equal({})
                 done()
@@ -305,54 +311,170 @@ describe('Http specific tests', function(){
     });
 });
 
-// describe.skip('Socket.io Server specific tests', function(){
-//     var db = require('../server.js').db
-//     var io = require('socket.io-client')
-//     var socketUrl = 'http://localhost:5000';
-//     var socketUrl = 'http://localhost:8080';
-//     var options = {  
-//        transports: ['websocket'],
-//        'force new connection': true};
+describe('Socket.io specific tests', function(){
+    // Configure default socket client
+    var io = require('socket.io-client')
+    var socketUrl = 'http://localhost:8080';
+    var options = {  
+       transports: ['websocket'],
+       'force new connection': true
+    }
     
-//     describe('socket on loopback test', function(){
-//         it('should respond back same data as original client emit data', function(done){
-//             var user1 = {'name':'bob@abc.com'}
-//             client1 = io.connect(socketUrl, options)
+    const user1 = {'name':'bob@abc.com'}
+    const origUser1Device1 = {
+        "deviceID":"device1",
+        "user":"testUser1",
+        "reminderTime":"ahead",
+        "timestamp":2}
+    const origUser1Device2 = {
+        "deviceID":"device2",
+        "user":"testUser1",
+        "reminderTime":"behind",
+        "timestamp":1}
+    const origUser2Device1 = {
+        "deviceID":"device1",
+        "user":"testUser2",
+        "reminderTime":"something",
+        "timestamp":1}
 
-//             client1.on('connect', function(data){
-//                 client1.emit('loopback test', user1)
-//             })
-            
-//             client1.on('new nessage', function(data){
-//                 data.should.deep.equal(user1)
-//                 client1.disconnect()
-//                 done()
-//             })
-//         });
-//     });
-//     describe('socket on send message', function(){
-//         it('should respond back data with {synced:true}', function(done){
-//             var origData1 = {
-//                 "deviceID":"abcd",
-//                 "user":"bob",
-//                 "reminderTime":"something",
-//                 "timestamp":1234}
-//             var syncedData1 = JSON.parse(JSON.stringify(origData1))
-            
-//             syncedData1['synced'] = true
-            
-//             client1 = io.connect(socketUrl, options)
+    beforeEach('start the server', function(done){
+        delete require.cache[require.resolve('../server')]; // Needed to start new server before each test
+        process.stdout.write("        ");
+        app = require('../server.js').app
+        server = require('../server.js').server
+        this.timeout(5000)  // Give server 5 sec to start-up (default 2 is not enough sometimes)
+        done()
+    })
+    afterEach('close the server', function(done){
+        server.close(function(){
+            process.stdout.write("        ");
+            console.log('Server closed on port ' + app.get('port'))
+            done()
+        })
+    })
+    
+    describe('emit loopback from client', function(){
+        it('should respond back same data from server as original client data', function(done){
+            client1 = io.connect(socketUrl, options)
 
-//             client1.on('connect', function(data){
-//                 client1.emit('send message', JSON.stringify(origData1))
-//             })
+            client1.on('connect', function(data){
+                client1.emit('loopback test', user1)
+            })
             
-//             client1.on('new message', function(data){
-//                 JSON.parse(data).should.deep.equal(syncedData1)
-//                 //console.log(db.read(origData1))
-//                 client1.disconnect()
-//                 done()
-//             })
-//         })
-//     });
-// });
+            client1.on('new message', function(data){
+                data.should.deep.equal(user1)
+                client1.disconnect()
+                done()
+            })
+        });
+    });
+    describe('emit send message from client', function(){
+        it('should respond back from server same data, plus synced true', function(done){
+            var origData1 = {
+                "deviceID":"abcd",
+                "user":"bob",
+                "reminderTime":"something",
+                "timestamp":1234}
+            var syncedData1 = JSON.parse(JSON.stringify(origData1))
+            
+            syncedData1['synced'] = true // Expect server to also add this property
+            syncedData1['reminder'] = "!fix a bug here!"
+
+            client1 = io.connect(socketUrl, options)
+
+            client1.on('connect', function(data){
+                client1.emit('send message', origData1)
+            })
+            
+            client1.on('new message', function(data){
+                data.should.deep.equal(syncedData1)
+                client1.disconnect()
+                done()
+            })
+        })
+    });
+    describe('emit request update from client with new data', function(){
+        it('should respond back from server same data plus synced=true to same user device', function(done){
+            var syncedUser1Device1 = JSON.parse(JSON.stringify(origUser1Device1))
+            syncedUser1Device1['synced'] = true // Expect server to also add this property
+            syncedUser1Device1['reminder'] = "!fix a bug here!" // Expect server to add this 
+
+            // User1 device1 sends data after 3 devices are connected
+            client1 = io.connect(socketUrl, options)
+            client1.on('connect', function(data){
+                client2 = io.connect(socketUrl, options)
+                client2.on('connect', function(){
+                    client3 = io.connect(socketUrl, options)
+                    client3.on('connect', function(){
+                        client1.emit('request update', origUser1Device1)
+                    })
+                })
+            })
+
+            client1.on('new message', function(data){
+                data.should.deep.equal(syncedUser1Device1)
+                client1.disconnect()
+                client2.disconnect()
+                client3.disconnect()
+                done()
+            })
+        })
+    })
+    describe('emit request update from client with new data', function(){
+        it('should respond back from server same data plus synced=true to different user device', function(done){
+            var syncedUser1Device1 = JSON.parse(JSON.stringify(origUser1Device1))
+            syncedUser1Device1['synced'] = true // Expect server to also add this property
+            syncedUser1Device1['reminder'] = "!fix a bug here!" // Expect server to add this 
+
+            // User1 device1 sends data after 3 devices are connected
+            client1 = io.connect(socketUrl, options)
+            client1.on('connect', function(data){
+                client2 = io.connect(socketUrl, options)
+                client2.on('connect', function(){
+                    client3 = io.connect(socketUrl, options)
+                    client3.on('connect', function(){
+                        client1.emit('request update', origUser1Device1)
+                        client3.emit('request update', origUser2Device1)
+                        client2.emit('request update', origUser1Device2)
+                    })
+                })
+
+                client2.on('new message', function(data){
+                    data.should.deep.equal(syncedUser1Device1)
+                    client1.disconnect()
+                    client2.disconnect()
+                    client3.disconnect()
+                    done()
+                })
+            })
+        })
+    })
+    describe('emit request update from client with new data', function(){
+        it('should not respond back from server to different user', function(done){
+            var syncedUser1Device1 = JSON.parse(JSON.stringify(origUser1Device1))
+            syncedUser1Device1['synced'] = true // Expect server to also add this property
+            syncedUser1Device1['reminder'] = "!fix a bug here!" // Expect server to add this 
+            var syncedUser2Device1 = JSON.parse(JSON.stringify(origUser2Device1))
+            syncedUser2Device1['synced'] = true // Expect server to also add this property
+            syncedUser2Device1['reminder'] = "!fix a bug here!" // Expect server to add this 
+
+            // User1 device1 sends data after 3 devices are connected
+            client1 = io.connect(socketUrl, options)
+            client1.on('connect', function(data){
+                client2 = io.connect(socketUrl, options)
+                client2.on('connect', function(){
+                    client2.emit('request update', origUser2Device1)
+                    client1.emit('request update', origUser1Device1)
+                })
+
+                client2.on('new message', function(data){
+                    data.should.deep.equal(syncedUser2Device1)
+                    data.should.not.deep.equal(syncedUser1Device1)
+                    client1.disconnect()
+                    client2.disconnect()
+                    done()
+                })
+            })
+        })
+    })
+});
