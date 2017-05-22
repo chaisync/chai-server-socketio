@@ -86,10 +86,10 @@ module.exports.listen = function(server){
             //console.log('Disconnection : ' + socket.id);
         });
 
-        socket.on('loopback test', function(data){
+        socket.on('echo', function(data){
             //console.log('server got ' + JSON.stringify(data))
             //console.log('...looped back.')
-            io.sockets.connected[socket.id].emit('new message', data)
+            socket.emit('new message', data)
         })
 
         socket.on('announce', function(clientIdent){

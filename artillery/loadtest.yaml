@@ -1,0 +1,14 @@
+config:
+  target: "http://localhost:8080"
+  phases:
+    -
+      duration: 10
+      arrivalRate: 10
+
+scenarios:
+- name: "A simple loopback test"
+  engine: "socketio"
+  flow:
+    - emit:
+        channel: "loopback test"
+        data: "hello"
