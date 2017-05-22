@@ -353,12 +353,12 @@ describe('Socket.io specific tests', function(){
         })
     })
     
-    describe('emit loopback from client', function(){
-        it('should respond back same data from server as original client data', function(done){
+    describe('emit echo from client', function(){
+        it('should echo back same data from server as original client data', function(done){
             client1 = io.connect(socketUrl, options)
 
             client1.on('connect', function(data){
-                client1.emit('loopback test', user1)
+                client1.emit('echo', user1)
             })
             
             client1.on('new message', function(data){
