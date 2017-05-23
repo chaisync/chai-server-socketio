@@ -328,6 +328,20 @@
                 // }         
             }
 
+            // 50% chance to change color on receive new msg
+            function gamble() {
+                var temp = Math.floor((Math.random() * 100) + 1);
+
+                console.log(temp);
+
+                if (temp <= 50) {
+                    document.getElementById("apptabdiv").style.backgroundColor = "yellow";
+                } else {
+                    document.getElementById("apptabdiv").style.backgroundColor = "lightblue";
+                }
+
+            }
+
             socket.on('new message', function(serverData){
                 var dataType = 'error'
                 if (serverData.hasOwnProperty('reminderTime')){
@@ -336,7 +350,10 @@
                 // else if (serverData.data[0].hasOwnProperty('notification')){
                 //     dataType = 'notification'
                 // }
-                
+
+                // 50% chance to change color
+                gamble();
+
                 $scope.localdb[dataType] = serverData
                 console.log('Localdb = ' + JSON.stringify($scope.localdb[dataType]))
                 
@@ -354,6 +371,7 @@
                 if (serverData.hasOwnProperty('reminderTime')){
                     dataType = 'reminder'
                 }
+
                 // else if (serverData.data[0].hasOwnProperty('notification')){
                 //     dataType = 'notification'
                 // }
